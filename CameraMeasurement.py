@@ -22,7 +22,7 @@ class HamamatsuMeasurement(Measurement):
         
         self.display_update_period = self.settings.refresh_period.val
         
-        self.np_data = np.empty([2048,2048])
+        
         
         #self.img = pg.gaussianFilter(np.random.normal(size=(400, 600)), (5, 5)) * 20 + 100
         
@@ -42,6 +42,8 @@ class HamamatsuMeasurement(Measurement):
         self.imv = pg.ImageView()
         self.ui.plot_groupBox.layout().addWidget(self.imv)
 
+        self.np_init = np.zeros([self.camera.subarrayh.val,self.camera.subarrayv.val])
+        self.image = self.np_init
         # Create PlotItem object (a set of axes)  
         
     def update_display(self):
@@ -51,9 +53,9 @@ class HamamatsuMeasurement(Measurement):
         its update frequency is defined by self.display_update_period
         """
         #self.optimize_plot_line.setData(self.buffer) 
-        self.imv.setImage(np.reshape(self.np_data,(2048, 2048)).T)
-        
-        
+
+        #self.imv.setImage(np.reshape(self.np_data,(self.camera.subarrayh.val, self.camera.subarrayv.val)).T)
+        self.imv.setImage(self.image)
     def run(self):
         
         self.camera.hamamatsu.startAcquisition()
@@ -68,6 +70,7 @@ class HamamatsuMeasurement(Measurement):
             # Save frames.
             for aframe in frames:
                 self.np_data = aframe.getData()
+                self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
                 
             print (i, len(frames))    
                 #np_data.tofile(bin_fp)

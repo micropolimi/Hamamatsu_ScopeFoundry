@@ -1,0 +1,21 @@
+2018-11-08T17:35:31|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraApp.py", line 24, in <module>
+    app = HamamatsuApp(sys.argv)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\base_app.py", line 334, in __init__
+    self.setup_default_ui()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\base_app.py", line 365, in setup_default_ui
+    measure.setup_figure()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 46, in setup_figure
+    self.imv.setImage(self.np_init)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\imageview\ImageView.py", line 301, in setImage
+    self.updateImage(autoHistogramRange=autoHistogramRange)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\imageview\ImageView.py", line 658, in updateImage
+    image = self.getProcessedImage()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\imageview\ImageView.py", line 385, in getProcessedImage
+    self.levelMin, self.levelMax = list(map(float, self.quickMinMax(self.imageDisp)))
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\imageview\ImageView.py", line 589, in quickMinMax
+    return nanmin(data), nanmax(data)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\numpy\lib\nanfunctions.py", line 281, in nanmin
+    res = np.fmin.reduce(a, axis=axis, out=out, **kwargs)
+ValueError: zero-size array to reduction operation fmin which has no identity
+

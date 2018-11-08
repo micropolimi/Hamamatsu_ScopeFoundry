@@ -16,7 +16,7 @@ class HamamatsuHardware(HardwareComponent):
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, initial = 0)
         self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=int, si = False, ro= 0, initial = 2048)
         self.subarrayv = self.add_logged_quantity("subarray_vsize", dtype=int, si = False, ro= 0, initial = 2048)
-        
+        self.submode = self.add_logged_quantity("subarray_mode", dtype = str, si = False, ro = 1, initial = 'ON')
         
     def connect(self):
         
@@ -24,7 +24,10 @@ class HamamatsuHardware(HardwareComponent):
         
         self.camera.hardware_read_func = self.hamamatsu.getModelInfo
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
+        self.submode.hardware_read_func = self.hamamatsu.setSubArrayMode
         
+        self.subarrayh.hardware_set_func = self.hamamatsu.setSubarrayh
+        self.subarrayv.hardware_set_func = self.hamamatsu.setSubarrayv
         self.exposure_time.hardware_set_func = self.hamamatsu.setExposure
         self.acquisition_mode.hardware_set_func = self.hamamatsu.setAcquisition
         self.number_frames.hardware_set_func = self.hamamatsu.setNumberImages

@@ -573,8 +573,8 @@ class HamamatsuDevice(object):
     
     def getTemperature(self):
         
-        return self.getPropertyValue("sensor_temperature")[0]
-
+        return self.getPropertyValue("sensor_temperature")[0]       
+    
     def isCameraProperty(self, property_name):
         """
         Check if a property name is supported by the camera.
@@ -649,6 +649,14 @@ class HamamatsuDevice(object):
     def setExposure(self, exposure):
         
         self.setPropertyValue("exposure_time", exposure)
+        
+    def setSubarrayh(self, hsize):
+        
+        self.setPropertyValue("subarray_hsize", hsize)
+        
+    def setSubarrayv(self, vsize):
+        
+        self.setPropertyValue("subarray_vsize", vsize)
 
     def setPropertyValue(self, property_name, property_value):
         """
@@ -703,6 +711,8 @@ class HamamatsuDevice(object):
             self.setPropertyValue("subarray_mode", "OFF")
         else:
             self.setPropertyValue("subarray_mode", "ON")
+        
+        return self.getPropertyValue("subarray_mode")[0]
     
     def setAcquisition(self, acq_mode):
         
