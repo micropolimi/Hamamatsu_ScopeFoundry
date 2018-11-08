@@ -1,0 +1,17 @@
+2018-11-08T12:25:06|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraApp.py", line 21, in <module>
+    app = HamamatsuApp(sys.argv)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\base_app.py", line 332, in __init__
+    self.setup()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraApp.py", line 10, in setup
+    self.add_hardware(HamamatsuHardware(self))
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\base_app.py", line 613, in add_hardware
+    hw.add_widgets_to_tree(tree=self.ui.hardware_treeWidget)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\hardware.py", line 154, in add_widgets_to_tree
+    self.settings.add_widgets_to_subtree(self.tree_item)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 1241, in add_widgets_to_subtree
+    lq.connect_to_widget(widget)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 383, in connect_to_widget
+    widget.setValue(self.val)
+TypeError: setValue(self, float): argument 1 has unexpected type 'list'
+
