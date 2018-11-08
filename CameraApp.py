@@ -11,6 +11,9 @@ class HamamatsuApp(BaseMicroscopeApp):
         
         print("Adding Hardware Components")
         
+        from CameraMeasurement import HamamatsuMeasurement
+        self.add_measurement(HamamatsuMeasurement(self))
+        
         self.ui.show()
         self.ui.activateWindow()
 

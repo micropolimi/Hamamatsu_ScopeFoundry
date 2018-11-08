@@ -1,6 +1,7 @@
 from ScopeFoundry import HardwareComponent
 import CameraDevice
 from CameraDevice import HamamatsuDevice
+from numpy import dtype
 
 class HamamatsuHardware(HardwareComponent):
     
@@ -9,11 +10,14 @@ class HamamatsuHardware(HardwareComponent):
     def setup(self):
         
         self.camera = self.add_logged_quantity('camera', dtype=str, si=False, ro=1, initial = 'No camera found' )
-        self.temperature = self.add_logged_quantity('temperature', dtype=float, si=False, ro=1)
+        self.temperature = self.add_logged_quantity('temperature', dtype=float, si=False, ro=1, unit = 'C')
         self.exposure_time = self.add_logged_quantity('exposure_time', dtype = float, si = False, ro = 0, unit = 'sec', initial = 0.01)
         self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, si = False, choices = ["fixed_length", "run_till_abort"])
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, initial = 0)
-    
+        self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=int, si = False, ro= 0, initial = 2048)
+        self.subarrayv = self.add_logged_quantity("subarray_vsize", dtype=int, si = False, ro= 0, initial = 2048)
+        
+        
     def connect(self):
         
         self.hamamatsu = HamamatsuDevice(camera_id=0) #maybe with more cameras we have to change
