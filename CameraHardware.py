@@ -16,8 +16,10 @@ class HamamatsuHardware(HardwareComponent):
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, initial = 1)
         self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=int, si = False, ro= 0, initial = 2048)
         self.subarrayv = self.add_logged_quantity("subarray_vsize", dtype=int, si = False, ro= 0, initial = 2048)
-        self.submode = self.add_logged_quantity("subarray_mode", dtype = str, si = False, ro = 1, initial = 'ON')
-        
+        self.submode = self.add_logged_quantity("subarray_mode", dtype=str, si = False, ro = 1, initial = 'ON')
+        self.trsource = self.add_logged_quantity('trigger_source', dtype=str, si=False, ro=0, choices = ["internal", "external"], initial = 'internal')
+        self.trmode = self.add_logged_quantity('trigger_mode', dtype=str, si=False, ro=0, choices = ["normal", "start"], initial = 'normal')
+        self.trpolarity = self.add_logged_quantity('trigger_polarity', dtype=str, si=False, ro=0, choices = ["positive", "negative"], initial = 'positive')
     def connect(self):
         """
         The initial connection does not update the value in the device,
@@ -27,7 +29,7 @@ class HamamatsuHardware(HardwareComponent):
         ScopeFoundry
         """
         
-        self.hamamatsu = HamamatsuDeviceMR(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, number_frames=self.number_frames.val, exposure=self.exposure_time.val ) #maybe with more cameras we have to change  
+        self.hamamatsu = HamamatsuDeviceMR(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, number_frames=self.number_frames.val, exposure=self.exposure_time.val, trsource=self.trsource.val, trmode=self.trmode.val, trpolarity=self.trpolarity.val ) #maybe with more cameras we have to change  
         
         self.camera.hardware_read_func = self.hamamatsu.getModelInfo
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
@@ -38,6 +40,9 @@ class HamamatsuHardware(HardwareComponent):
         self.exposure_time.hardware_set_func = self.hamamatsu.setExposure
         self.acquisition_mode.hardware_set_func = self.hamamatsu.setAcquisition
         self.number_frames.hardware_set_func = self.hamamatsu.setNumberImages
+        self.trsource.hardware_set_func = self.hamamatsu.setTriggerSource
+        self.trmode.hardware_set_func = self.hamamatsu.setTriggerMode
+        self.trpolarity.hardware_set_func = self.hamamatsu.setTriggerPolarity
         
 #         self.subarrayh.update_value(2048)
 #         self.subarrayv.update_value(2048)

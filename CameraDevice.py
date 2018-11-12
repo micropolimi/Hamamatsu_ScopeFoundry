@@ -250,7 +250,7 @@ class HamamatsuDevice(object):
     Storage for the data from the camera is allocated dynamically and
     copied out of the camera buffers.
     """
-    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, camera_id = None, **kwds):
+    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, trsource, trmode, trpolarity, camera_id = None, **kwds):
         """
         Open the connection to the camera specified by camera_id.
         """
@@ -269,6 +269,9 @@ class HamamatsuDevice(object):
         self.max_backlog = 0
         self.number_image_buffers = 0
         
+        self.trig_dict_source = {"internal":DCAMPROP_TRIGGERSOURCE__INTERNAL, "external":DCAMPROP_TRIGGERSOURCE__EXTERNAL}
+        self.trig_dict_mode = {"normal":DCAMPROP_TRIGGER_MODE__NORMAL, "start":DCAMPROP_TRIGGER_MODE__START}
+        self.trig_dict_polarity = {"negative":DCAMPROP_TRIGGERPOLARITY__NEGATIVE, "positive":DCAMPROP_TRIGGERPOLARITY__POSITIVE}
 
         self.acquisition_mode = acquisition_mode
         self.number_frames = number_frames
@@ -298,10 +301,14 @@ class HamamatsuDevice(object):
         self.max_width = self.getPropertyValue("image_width")[0]
         self.max_height = self.getPropertyValue("image_height")[0]
         
+        # Here we set the values in order to change these properties before the connection
         self.setExposure(exposure)
         self.setSubarrayH(frame_x)
         self.setSubarrayV(frame_y)
         self.setSubArrayMode()
+        self.setTriggerSource(trsource)
+        self.setTriggerMode(trmode)
+        self.setTriggerPolarity(trpolarity)
 
 
     def captureSetup(self):
@@ -748,9 +755,17 @@ class HamamatsuDevice(object):
             self.number_frames = number_frames
         else:
             raise DCAMException("Unrecognized acqusition mode: " + mode)
+
+    def setTriggerSource(self, trsource):
+        self.setPropertyValue("trigger_source", self.trig_dict_source[trsource])
+        
+    def setTriggerMode(self, trmode):
+        self.setPropertyValue("trigger_mode", self.trig_dict_mode[trmode])
     
-
-
+    def setTriggerPolarity(self, trpolarity):
+        self.setPropertyValue("trigger_polarity", self.trig_dict_polarity[trpolarity])
+    
+    
     def startAcquisition(self):
         """
         Start data acquisition.
@@ -959,3 +974,27 @@ if (error_code != DCAMERR_NOERROR):
     raise DCAMException("DCAM initialization failed with error code " + str(error_code))
 
 n_cameras = paraminit.iDeviceCount
+
+#
+# The MIT License
+#
+# Copyright (c) 2013 Zhuang Lab, Harvard University
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
