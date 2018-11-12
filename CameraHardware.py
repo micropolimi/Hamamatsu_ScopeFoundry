@@ -32,7 +32,7 @@ class HamamatsuHardware(HardwareComponent):
         self.camera.hardware_read_func = self.hamamatsu.getModelInfo
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
         self.submode.hardware_read_func = self.hamamatsu.setSubArrayMode
-        
+#comments
         self.subarrayh.hardware_set_func = self.hamamatsu.setSubarrayH
         self.subarrayv.hardware_set_func = self.hamamatsu.setSubarrayV
         self.exposure_time.hardware_set_func = self.hamamatsu.setExposure
