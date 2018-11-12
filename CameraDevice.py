@@ -250,12 +250,13 @@ class HamamatsuDevice(object):
     Storage for the data from the camera is allocated dynamically and
     copied out of the camera buffers.
     """
-    def __init__(self, camera_id = None, **kwds):
+    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, camera_id = None, **kwds):
         """
         Open the connection to the camera specified by camera_id.
         """
         super().__init__(**kwds)
-
+        
+        self.dcam = dcam
         self.buffer_index = 0
         self.camera_id = camera_id
         self.debug = False
@@ -267,9 +268,10 @@ class HamamatsuDevice(object):
         self.properties = None
         self.max_backlog = 0
         self.number_image_buffers = 0
+        
 
-        self.acquisition_mode = "run_till_abort"
-        self.number_frames = 0
+        self.acquisition_mode = acquisition_mode
+        self.number_frames = number_frames
 
         
         # Get camera model.
@@ -295,6 +297,11 @@ class HamamatsuDevice(object):
         # Get camera max width, height.
         self.max_width = self.getPropertyValue("image_width")[0]
         self.max_height = self.getPropertyValue("image_height")[0]
+        
+        self.setExposure(exposure)
+        self.setSubarrayH(frame_x)
+        self.setSubarrayV(frame_y)
+        self.setSubArrayMode()
 
 
     def captureSetup(self):
@@ -650,11 +657,11 @@ class HamamatsuDevice(object):
         
         self.setPropertyValue("exposure_time", exposure)
         
-    def setSubarrayh(self, hsize):
+    def setSubarrayH(self, hsize):
         
         self.setPropertyValue("subarray_hsize", hsize)
         
-    def setSubarrayv(self, vsize):
+    def setSubarrayV(self, vsize):
         
         self.setPropertyValue("subarray_vsize", vsize)
 
@@ -715,11 +722,11 @@ class HamamatsuDevice(object):
         return self.getPropertyValue("subarray_mode")[0]
     
     def setAcquisition(self, acq_mode):
-        
+        self.stopAcquisition()
         self.acquisition_mode = acq_mode
     
     def setNumberImages(self, num_images):
-        
+        self.stopAcquisition()
         self.number_frames = num_images
         
     def setACQMode(self, mode, number_frames = None):
@@ -756,7 +763,7 @@ class HamamatsuDevice(object):
         # number of frames for a fixed length acquisition
         #
         if self.acquisition_mode is "run_till_abort":
-            n_buffers = int(2.0*self.getPropertyValue("internal_frame_rate")[0])
+            n_buffers = int(20.0*self.getPropertyValue("internal_frame_rate")[0])
         elif self.acquisition_mode is "fixed_length":
             n_buffers = self.number_frames
 
@@ -812,6 +819,136 @@ class HamamatsuDevice(object):
         text_values = self.getPropertyText(property_name)
         return sorted(text_values, key = text_values.get)
     
+class HamamatsuDeviceMR(HamamatsuDevice):
+    """
+    Memory recycling camera class.
+    
+    This version allocates "user memory" for the Hamamatsu camera 
+    buffers. This memory is also the location of the storage for
+    the np_array element of a HCamData() class. The memory is
+    allocated once at the beginning, then recycled. This means
+    that there is a lot less memory allocation & shuffling compared
+    to the basic class, which performs one allocation and (I believe)
+    two copies for each frame that is acquired.
+    
+    WARNING: There is the potential here for chaos. Since the memory
+             is now shared there is the possibility that downstream code
+             will try and access the same bit of memory at the same time
+             as the camera and this could end badly.
+
+    FIXME: Use lockbits (and unlockbits) to avoid memory clashes?
+           This would probably also involve some kind of reference 
+           counting scheme.
+    """
+    def __init__(self, **kwds):
+        super().__init__(**kwds)
+
+        self.hcam_data = []
+        self.hcam_ptr = False
+        self.old_frame_bytes = -1
+
+        #self.setPropertyValue("output_trigger_kind[0]", 2)
+
+    def getFrames(self):
+        """
+        Gets all of the available frames.
+        
+        This will block waiting for new frames even if there new frames 
+        available when it is called.
+        
+        FIXME: It does not always seem to block? The length of frames can
+               be zero. Are frames getting dropped? Some sort of race condition?
+        """
+        frames = []
+        for n in self.newFrames():
+            frames.append(self.hcam_data[n])
+
+        return [frames, [self.frame_x, self.frame_y]]
+
+    def startAcquisition(self):
+        """
+        Allocate as many frames as will fit in 2GB of memory and start data acquisition.
+        """
+        self.captureSetup()
+
+        # Allocate new image buffers if necessary. This will allocate
+        # as many frames as can fit in 2GB of memory, or 2000 frames,
+        # which ever is smaller. The problem is that if the frame size
+        # is small than a lot of buffers can fit in 2GB. Assuming that
+        # the camera maximum speed is something like 1KHz 2000 frames
+        # should be enough for 2 seconds of storage, which will hopefully
+        # be long enough.
+        #
+        #backslash is used to escape the newline
+        if (self.old_frame_bytes != self.frame_bytes) or \
+                (self.acquisition_mode is "fixed_length"): 
+
+            n_buffers = min(int((2.0 * 1024 * 1024 * 1024)/self.frame_bytes), 2000)
+            if self.acquisition_mode is "fixed_length":
+                self.number_image_buffers = self.number_frames
+            else:
+                self.number_image_buffers = n_buffers
+
+            # Allocate new image buffers.
+            ptr_array = ctypes.c_void_p * self.number_image_buffers #crea un array del tipo c_void_p
+            self.hcam_ptr = ptr_array() 
+            self.hcam_data = []
+            for i in range(self.number_image_buffers):
+                hc_data = HCamData(self.frame_bytes)
+                self.hcam_ptr[i] = hc_data.getDataPtr()
+                self.hcam_data.append(hc_data)
+
+            self.old_frame_bytes = self.frame_bytes
+
+        # Attach image buffers and start acquisition.
+        #
+        # We need to attach & release for each acquisition otherwise
+        # we'll get an error if we try to change the ROI in any way
+        # between acquisitions.
+
+
+        paramattach = DCAMBUF_ATTACH(0, DCAMBUF_ATTACHKIND_FRAME,
+                self.hcam_ptr, self.number_image_buffers)
+        paramattach.size = ctypes.sizeof(paramattach)
+
+        if self.acquisition_mode is "run_till_abort":
+            self.checkStatus(dcam.dcambuf_attach(self.camera_handle,
+                                    paramattach),
+                             "dcam_attachbuffer")
+            self.checkStatus(dcam.dcamcap_start(self.camera_handle,
+                                    DCAMCAP_START_SEQUENCE),
+                             "dcamcap_start")
+        if self.acquisition_mode is "fixed_length":
+            paramattach.buffercount = self.number_frames
+            self.checkStatus(dcam.dcambuf_attach(self.camera_handle,
+                                    paramattach),
+                             "dcambuf_attach")
+            self.checkStatus(dcam.dcamcap_start(self.camera_handle,
+                                    DCAMCAP_START_SNAP),
+                             "dcamcap_start")
+
+
+    def stopAcquisition(self):
+        """
+        Stop data acquisition and release the memory associates with the frames.
+        """
+
+
+        # Stop acquisition.
+        self.checkStatus(dcam.dcamcap_stop(self.camera_handle),
+                         "dcamcap_stop")
+
+        # Release image buffers.
+        if (self.hcam_ptr):
+            self.checkStatus(dcam.dcambuf_release(self.camera_handle,
+                                                DCAMBUF_ATTACHKIND_FRAME),
+                         "dcambuf_release")
+
+        print("max camera backlog was:", self.max_backlog)
+        self.max_backlog = 0
+    
+    
+        
     
 
 dcam = ctypes.windll.dcamapi

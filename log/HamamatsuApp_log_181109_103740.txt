@@ -1,0 +1,28 @@
+2018-11-09T10:37:51|ERROR|HamamatsuApp|tried to disconnect HamamatsuHardware: exception: access violation reading 0x000001DD8F74F03F
+2018-11-09T10:37:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 69, in run
+    [frames, dims] = self.camera.hamamatsu.getFrames()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 403, in getFrames
+    hc_data.copyData(paramlock.buf)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 236, in copyData
+    ctypes.memmove(self.np_array.ctypes.data, address, self.size) #copies self.size bytes from address into self.np_array.ctyps.data
+OSError: exception: access violation reading 0x0000000000000000
+
+2018-11-09T10:37:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraApp.py", line 25, in <module>
+    sys.exit(app.exec_())
+SystemExit: 0
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraApp.py", line 27, in <module>
+    app.hw.disconnect()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraHardware.py", line 47, in disconnect
+    error_uninit = self.hamamatsu.dcam.dcamapi_uninit()
+OSError: exception: access violation writing 0x0000000000000000
+

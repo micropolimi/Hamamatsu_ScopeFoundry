@@ -56,25 +56,47 @@ class HamamatsuMeasurement(Measurement):
 
         #self.imv.setImage(np.reshape(self.np_data,(self.camera.subarrayh.val, self.camera.subarrayv.val)).T)
         self.imv.setImage(self.image)
+        
     def run(self):
         
-        self.camera.hamamatsu.startAcquisition()
-        
-        print(self.camera.hamamatsu.number_frames)
-              
-        for i in range(self.camera.hamamatsu.number_frames):
-
-            # Get frames.
-            [frames, dims] = self.camera.hamamatsu.getFrames()
-    
-            # Save frames.
-            for aframe in frames:
-                self.np_data = aframe.getData()
-                self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+        try:
+            
+            self.camera.hamamatsu.startAcquisition()
+            if self.camera.acquisition_mode.val == "fixed_length":
                 
-            print (i, len(frames))    
-                #np_data.tofile(bin_fp)
+                for i in range(self.camera.hamamatsu.number_image_buffers):
+        
+                    # Get frames.
+                    [frames, dims] = self.camera.hamamatsu.getFrames()
+            
+                    # Save frames.
+                    for aframe in frames:
+                        self.np_data = aframe.getData()
+                        self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+                        if self.interrupt_measurement_called:
+                            break
+                    print (i, len(frames))    
+                        #np_data.tofile(bin_fp)
+            else:
+                
+                while not self.interrupt_measurement_called:
+                    
+                    [frames, dims] = self.camera.hamamatsu.getFrames()
+            
+                    # Save frames.
+                    
+                    for aframe in frames:
+                        self.np_data = aframe.getData()
+                        self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+                        
+                    # print (i, len(frames))    
+                    
+                
+                
 
-        self.camera.hamamatsu.stopAcquisition()
+        finally:
+            
+            self.camera.hamamatsu.stopAcquisition()
+
         
         
