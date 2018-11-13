@@ -11,7 +11,7 @@ class HamamatsuHardware(HardwareComponent):
         
         self.camera = self.add_logged_quantity('camera', dtype=str, si=False, ro=1, initial = 'No camera found' )
         self.temperature = self.add_logged_quantity('temperature', dtype=float, si=False, ro=1, unit = 'Celsius')
-        self.exposure_time = self.add_logged_quantity('exposure_time', dtype = float, si = False, ro = 0, unit = 'sec', initial = 0.01)
+        self.exposure_time = self.add_logged_quantity('exposure_time', dtype = float, si = False, spinbox_decimals = 4, ro = 0, unit = 'sec', initial = 0.01)
         self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, choices = ["fixed_length", "run_till_abort"], initial = "fixed_length")
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, initial = 1)
         self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=int, si = False, ro= 0, initial = 2048)
@@ -20,6 +20,7 @@ class HamamatsuHardware(HardwareComponent):
         self.trsource = self.add_logged_quantity('trigger_source', dtype=str, si=False, ro=0, choices = ["internal", "external"], initial = 'internal')
         self.trmode = self.add_logged_quantity('trigger_mode', dtype=str, si=False, ro=0, choices = ["normal", "start"], initial = 'normal')
         self.trpolarity = self.add_logged_quantity('trigger_polarity', dtype=str, si=False, ro=0, choices = ["positive", "negative"], initial = 'positive')
+    
     def connect(self):
         """
         The initial connection does not update the value in the device,
@@ -43,7 +44,6 @@ class HamamatsuHardware(HardwareComponent):
         self.trsource.hardware_set_func = self.hamamatsu.setTriggerSource
         self.trmode.hardware_set_func = self.hamamatsu.setTriggerMode
         self.trpolarity.hardware_set_func = self.hamamatsu.setTriggerPolarity
-        
 #         self.subarrayh.update_value(2048)
 #         self.subarrayv.update_value(2048)
 #         self.exposure_time.update_value(0.01)

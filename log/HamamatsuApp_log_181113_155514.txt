@@ -1,0 +1,5 @@
+2018-11-13T15:55:30|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+TypeError: setautoLevels() takes 1 positional argument but 2 were given
+

@@ -5,24 +5,29 @@ import pyqtgraph as pg
 import numpy as np
 import time
 
+
 class HamamatsuMeasurement(Measurement):
     
     name = "hamamatsu_plot"
     
     def setup(self):
         "..."
+
         self.ui_filename = sibling_path(__file__, "form.ui")
     
         self.ui = load_qt_ui_file(self.ui_filename)
         
         self.settings.New('save_h5', dtype=bool, initial=False)
-        self.settings.New('refresh_period', dtype=float, unit='s', initial=0.1)
-        
+        self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.001)
+        self.settings.New('autoLevels', dtype=bool, initial=True, hardware_set_func=self.setautoLevels)
+        self.settings.New('level_min', dtype=int, initial=60, hardware_set_func=self.setminLevel)
+        self.settings.New('level_max', dtype=int, initial=150, hardware_set_func=self.setmaxLevel)
         self.camera = self.app.hardware['HamamatsuHardware']
         
         self.display_update_period = self.settings.refresh_period.val
-        
-        
+        self.autoLevels = self.settings.autoLevels.val
+        self.level_min = self.settings.level_min.val
+        self.level_max = self.settings.level_max.val
         
         #self.img = pg.gaussianFilter(np.random.normal(size=(400, 600)), (5, 5)) * 20 + 100
         
@@ -38,10 +43,16 @@ class HamamatsuMeasurement(Measurement):
         self.ui.interrupt_pushButton.clicked.connect(self.interrupt)
         self.settings.save_h5.connect_to_widget(self.ui.save_h5_checkBox)
         
+        # coonect ui widgets of live settings
+        self.settings.autoLevels.connect_to_widget(self.ui.autoLevels_checkBox)
+        self.settings.level_min.connect_to_widget(self.ui.min_doubleSpinBox) #spinBox doesn't work nut it would be better
+        self.settings.level_max.connect_to_widget(self.ui.max_doubleSpinBox) #spinBox doesn't work nut it would be better
+        
         # Set up pyqtgraph graph_layout in the UI
         self.imv = pg.ImageView()
         self.ui.plot_groupBox.layout().addWidget(self.imv)
-
+        
+        # Image intialization
         self.np_init = np.zeros([self.camera.subarrayh.val,self.camera.subarrayv.val])
         self.image = self.np_init
         # Create PlotItem object (a set of axes)  
@@ -55,8 +66,14 @@ class HamamatsuMeasurement(Measurement):
         #self.optimize_plot_line.setData(self.buffer) 
 
         #self.imv.setImage(np.reshape(self.np_data,(self.camera.subarrayh.val, self.camera.subarrayv.val)).T)
-        self.imv.setImage(self.image)
+        #self.imv.setImage(self.image, autoLevels=False, levels=(100,340))
         
+        #levels should not be sent when autoLevels is True, otherwise the image is displayed with them
+        if self.autoLevels == False:
+            self.imv.setImage(self.image, autoLevels=self.autoLevels, levels=(self.level_min, self.level_max))
+        else:
+            self.imv.setImage(self.image, autoLevels=self.autoLevels)
+            
     def run(self):
         
         try:
@@ -98,5 +115,12 @@ class HamamatsuMeasurement(Measurement):
             
             self.camera.hamamatsu.stopAcquisition()
 
+    def setautoLevels(self, autoLevels):
+       
+        self.autoLevels = autoLevels
         
+    def setminLevel(self, level_min):
+        self.level_min = level_min
         
+    def setmaxLevel(self, level_max):
+        self.level_max = level_max

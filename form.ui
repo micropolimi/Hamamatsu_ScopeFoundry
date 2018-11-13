@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>681</width>
+    <height>728</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,13 @@
       <string>Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="save_h5_checkBox">
+        <property name="text">
+         <string>Save H5</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QPushButton" name="interrupt_pushButton">
         <property name="text">
@@ -42,11 +49,75 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1" alignment="Qt::AlignRight">
-       <widget class="QCheckBox" name="save_h5_checkBox">
-        <property name="text">
-         <string>Save H5</string>
+      <item row="0" column="1" rowspan="3">
+       <widget class="QGroupBox" name="Live_groupBox">
+        <property name="title">
+         <string>Live</string>
         </property>
+        <widget class="QCheckBox" name="autoLevels_checkBox">
+         <property name="geometry">
+          <rect>
+           <x>2</x>
+           <y>15</y>
+           <width>76</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>autoLevels</string>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="min_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>10</y>
+           <width>37</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="max_doubleSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>160</x>
+           <y>10</y>
+           <width>37</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_max">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>10</y>
+           <width>21</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>max</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_min">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>10</y>
+           <width>21</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>min</string>
+         </property>
+        </widget>
+        <zorder>label_max</zorder>
+        <zorder>autoLevels_checkBox</zorder>
+        <zorder>min_doubleSpinBox</zorder>
+        <zorder>max_doubleSpinBox</zorder>
+        <zorder>label_min</zorder>
        </widget>
       </item>
      </layout>

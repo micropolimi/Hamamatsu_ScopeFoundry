@@ -1,5 +1,5 @@
 """ Written by Michele Castriotta, Alessandro Zecchi, Andrea Bassi (Polimi).
-   Code for creating the device class of scopefoundry for the Orca Flash 4V3
+   Code for creating the device class of ScopeFoundry for the Orca Flash 4V3
    
    11/18
 """
@@ -268,7 +268,7 @@ class HamamatsuDevice(object):
         self.properties = None
         self.max_backlog = 0
         self.number_image_buffers = 0
-        
+        #dictionaries for trigger properties
         self.trig_dict_source = {"internal":DCAMPROP_TRIGGERSOURCE__INTERNAL, "external":DCAMPROP_TRIGGERSOURCE__EXTERNAL}
         self.trig_dict_mode = {"normal":DCAMPROP_TRIGGER_MODE__NORMAL, "start":DCAMPROP_TRIGGER_MODE__START}
         self.trig_dict_polarity = {"negative":DCAMPROP_TRIGGERPOLARITY__NEGATIVE, "positive":DCAMPROP_TRIGGERPOLARITY__POSITIVE}
@@ -764,7 +764,6 @@ class HamamatsuDevice(object):
     
     def setTriggerPolarity(self, trpolarity):
         self.setPropertyValue("trigger_polarity", self.trig_dict_polarity[trpolarity])
-    
     
     def startAcquisition(self):
         """
