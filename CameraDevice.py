@@ -12,6 +12,27 @@ import numpy as np
 # DCAM4 API.
 DCAMERR_ERROR = 0
 DCAMERR_NOERROR = 1
+#DCAMERR_INVALIDPARAM = int("0x80000808", 0)
+#DCAMERR_INVALIDPARAM = ctypes.c_int32(0x80000808).value #done this way because ctypes convert properly the hexadecimal (I think it's a problem of two complement convention)
+DCAMERR_BUSY = ctypes.c_int32(0x80000101).value
+
+err_dict = {#ctypes.c_int32(0x80000808).value : "DCAMERR_INVALIDPARAM", 
+            #ctypes.c_int32(0x80000101).value : "DCAMERR_BUSY",
+            #ctypes.c_int32(0x80000103).value : "DCAMERR_NOTREADY",
+            #ctypes.c_int32(0x80000104).value : "DCAMERR_NOTSTABLE",
+            #ctypes.c_int32(0x80000105).value : "DCAMERR_UNSTABLE",
+            #ctypes.c_int32(0x80000107).value : "DCAMERR_NOTBUSY",
+            #ctypes.c_int32(0x80000110).value : "DCAMERR_EXCLUDED",
+            #ctypes.c_int32(0x80000302).value : "DCAMERR_COOLINGTROUBLE",
+            #ctypes.c_int32(0x80000303).value : "DCAMERR_NOTRIGGER",
+            #ctypes.c_int32(0x80000304).value : "DCAMERR_TEMPERATURE_TROUBLE",
+            #ctypes.c_int32(0x80000305).value : "DCAMERR_TOOFREQUENTTRIGGER",
+            #ctypes.c_int32(0x80000102).value : "DCAMERR_ABORT",
+            #ctypes.c_int32(0x80000106).value : "DCAMERR_TIMEOUT",
+            #ctypes.c_int32(0x80000301).value : "DCAMERR_LOSTFRAME",
+            #ctypes.c_int32(0x80000f06).value : "DCAMERR_MISSINGFRAME_TROUBLE",
+            0 : "DCAMERR_ERROR"}
+            #ctypes.c_int32(0x80000828).value : "DCAMERR_NOPROPERTY"}
 
 DCAMPROP_ATTR_HASRANGE = int("0x80000000", 0)
 DCAMPROP_ATTR_HASVALUETEXT = int("0x10000000", 0)
@@ -309,6 +330,7 @@ class HamamatsuDevice(object):
         self.setTriggerSource(trsource)
         self.setTriggerMode(trmode)
         self.setTriggerPolarity(trpolarity)
+        
 
 
     def captureSetup(self):
@@ -336,13 +358,16 @@ class HamamatsuDevice(object):
         """
         #if (fn_return != DCAMERR_NOERROR) and (fn_return != DCAMERR_ERROR):
         #    raise DCAMException("dcam error: " + fn_name + " returned " + str(fn_return))
-        if (fn_return == DCAMERR_ERROR):
+        if (fn_return in err_dict):
             c_buf_len = 80
             c_buf = ctypes.create_string_buffer(c_buf_len)
             c_error = dcam.dcam_getlasterror(self.camera_handle, 
                                              c_buf,
                                              ctypes.c_int32(c_buf_len))
-            raise DCAMException("dcam error " + str(fn_name) + " " + str(c_buf.value))
+            #if c_buf.value in err_dict: #if the error is present in the list, we call it by name
+            raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+            #else:
+            #   raise DCAMException("dcam error " + str(fn_name) + " " + str(c_buf.value) + "unknown error")
             #print "dcam error", fn_name, c_buf.value
         return fn_return
 
@@ -664,13 +689,27 @@ class HamamatsuDevice(object):
         
         self.setPropertyValue("exposure_time", exposure)
         
-    def setSubarrayH(self, hsize):
+    def getExposure(self):
         
+        return self.getPropertyValue("exposure_time")[0]
+        
+    def setSubarrayH(self, hsize):
+        if hsize % 4 != 0:
+            hsize = hsize - hsize%4
         self.setPropertyValue("subarray_hsize", hsize)
+    
+    def getSubarrayH(self):
+        
+        return self.getPropertyValue("subarray_hsize")[0]
         
     def setSubarrayV(self, vsize):
-        
+        if vsize % 4 != 0:
+            vsize = vsize - vsize%4
         self.setPropertyValue("subarray_vsize", vsize)
+        
+    def getSubarrayV(self):
+        
+        return self.getPropertyValue("subarray_vsize")[0]
 
     def setPropertyValue(self, property_name, property_value):
         """
@@ -704,13 +743,16 @@ class HamamatsuDevice(object):
         # Set the property value, return what it was set too.
         prop_id = self.properties[property_name]
         p_value = ctypes.c_double(property_value)
-        self.checkStatus(dcam.dcamprop_setgetvalue(self.camera_handle,
+        param = self.checkStatus(dcam.dcamprop_setgetvalue(self.camera_handle,
                                            ctypes.c_int32(prop_id),
                                            ctypes.byref(p_value),
                                            ctypes.c_int32(DCAM_DEFAULT_ARG)),
                          "dcamprop_setgetvalue")
-        return p_value.value
-
+        
+        #if param == DCAMERR_INVALIDPARAM:
+        #    actual_val = self.getPropertyValue(property_name)[0]
+        #    raise DCAMException(" The parameter is not valid, the set value is: {}".format(actual_val))
+        
     def setSubArrayMode(self):
         """
         This sets the sub-array mode as appropriate based on the current ROI.
@@ -726,15 +768,22 @@ class HamamatsuDevice(object):
         else:
             self.setPropertyValue("subarray_mode", "ON")
         
-        return self.getPropertyValue("subarray_mode")[0]
+        if self.getPropertyValue("subarray_mode")[0] == 1:
+            return "OFF"
+        else:
+            return "ON"
     
     def setAcquisition(self, acq_mode):
-        self.stopAcquisition()
+#        self.stopAcquisition()
         self.acquisition_mode = acq_mode
     
     def setNumberImages(self, num_images):
-        self.stopAcquisition()
-        self.number_frames = num_images
+#       self.stopAcquisition()
+        if num_images < 0:
+            print("The number of frames can't be less than 0.")
+            return None
+        else:
+            self.number_frames = num_images
         
     def setACQMode(self, mode, number_frames = None):
         '''
@@ -757,13 +806,45 @@ class HamamatsuDevice(object):
             raise DCAMException("Unrecognized acqusition mode: " + mode)
 
     def setTriggerSource(self, trsource):
-        self.setPropertyValue("trigger_source", self.trig_dict_source[trsource])
         
+        if self.isCapturing() != DCAMCAP_STATUS_BUSY:
+            self.setPropertyValue("trigger_source", self.trig_dict_source[trsource])
+    
     def setTriggerMode(self, trmode):
-        self.setPropertyValue("trigger_mode", self.trig_dict_mode[trmode])
+        
+        if self.isCapturing() != DCAMCAP_STATUS_BUSY:
+            self.setPropertyValue("trigger_mode", self.trig_dict_mode[trmode])
     
     def setTriggerPolarity(self, trpolarity):
-        self.setPropertyValue("trigger_polarity", self.trig_dict_polarity[trpolarity])
+        
+        if self.isCapturing() != DCAMCAP_STATUS_BUSY:
+            self.setPropertyValue("trigger_polarity", self.trig_dict_polarity[trpolarity])
+            
+    def getTriggerSource(self):
+        
+        inv_dict = {v: k for k, v in self.trig_dict_source.items()}
+        
+        return inv_dict[self.getPropertyValue("trigger_source")[0]]
+    
+    def getTriggerMode(self):
+        
+        inv_dict = {v: k for k, v in self.trig_dict_mode.items()}
+        
+        return inv_dict[self.getPropertyValue("trigger_mode")[0]]
+    
+    def getTriggerPolarity(self):
+        
+        inv_dict = {v: k for k, v in self.trig_dict_polarity.items()}
+        
+        return inv_dict[self.getPropertyValue("trigger_polarity")[0]]
+    
+    def isCapturing(self):
+        
+        captureStatus = ctypes.c_int32(0)
+        self.checkStatus(dcam.dcamcap_status(
+            self.camera_handle, ctypes.byref(captureStatus)))
+        
+        return captureStatus.value
     
     def startAcquisition(self):
         """

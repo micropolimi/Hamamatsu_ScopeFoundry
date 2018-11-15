@@ -1,0 +1,26 @@
+2018-11-14T17:17:15|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 93, in run
+    self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+  File "C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\fromnumeric.py", line 279, in reshape
+    return _wrapfunc(a, 'reshape', newshape, order=order)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\fromnumeric.py", line 51, in _wrapfunc
+    return getattr(obj, method)(*args, **kwds)
+ValueError: cannot reshape array of size 4186112 into shape (2046,2044)
+
+2018-11-14T17:17:25|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 93, in run
+    self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+  File "C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\fromnumeric.py", line 279, in reshape
+    return _wrapfunc(a, 'reshape', newshape, order=order)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\fromnumeric.py", line 51, in _wrapfunc
+    return getattr(obj, method)(*args, **kwds)
+ValueError: cannot reshape array of size 4194304 into shape (2047,2045)
+

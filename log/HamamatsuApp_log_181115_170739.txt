@@ -1,0 +1,15 @@
+2018-11-15T17:07:42|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\hardware.py", line 208, in enable_connection
+    raise err
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\hardware.py", line 204, in enable_connection
+    self.connect()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraHardware.py", line 85, in connect
+    self.read_from_hardware() #read from harrdware at connection
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\hardware.py", line 181, in read_from_hardware
+    lq.read_from_hardware()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 161, in read_from_hardware
+    val = self.hardware_read_func()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 824, in getTriggerSource
+    inv_dict = {v: k for k, v in self.trig_dict_source.itmes()}
+AttributeError: 'dict' object has no attribute 'itmes'
+

@@ -1,0 +1,56 @@
+2018-11-15T16:15:54|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 81, in run
+    self.camera.hamamatsu.startAcquisition()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 990, in startAcquisition
+    "dcamcap_start")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamcap_start ==> DCAMERR_NOTREADY ==> b'0x80000103: dcamdig.dll: Status is not ready!'
+
+2018-11-15T16:16:07|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 81, in run
+    self.camera.hamamatsu.startAcquisition()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 990, in startAcquisition
+    "dcamcap_start")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamcap_start ==> DCAMERR_NOTREADY ==> b'0x80000103: dcamdig.dll: Status is not ready!'
+
+2018-11-15T16:16:15|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 88, in run
+    [frames, dims] = self.camera.hamamatsu.getFrames()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 925, in getFrames
+    for n in self.newFrames():
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 648, in newFrames
+    "dcamwait_start")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamwait_start ==> DCAMERR_TIMEOUT ==> b'0x80000822: dcamdig.dll: Value is out of range!'
+
+2018-11-15T16:16:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraMeasurement.py", line 102, in run
+    [frames, dims] = self.camera.hamamatsu.getFrames()
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 925, in getFrames
+    for n in self.newFrames():
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 648, in newFrames
+    "dcamwait_start")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamwait_start ==> DCAMERR_TIMEOUT ==> b'0x80000822: dcamdig.dll: Value is out of range!'
+

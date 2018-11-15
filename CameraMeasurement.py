@@ -53,7 +53,7 @@ class HamamatsuMeasurement(Measurement):
         self.ui.plot_groupBox.layout().addWidget(self.imv)
         
         # Image intialization
-        self.np_init = np.zeros([self.camera.subarrayh.val,self.camera.subarrayv.val])
+        self.np_init = np.zeros([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)])
         self.image = self.np_init
         # Create PlotItem object (a set of axes)  
         
@@ -76,9 +76,11 @@ class HamamatsuMeasurement(Measurement):
             
     def run(self):
         
+        print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
             
             self.camera.hamamatsu.startAcquisition()
+            
             if self.camera.acquisition_mode.val == "fixed_length":
                 
                 for i in range(self.camera.hamamatsu.number_image_buffers):
@@ -89,7 +91,7 @@ class HamamatsuMeasurement(Measurement):
                     # Save frames.
                     for aframe in frames:
                         self.np_data = aframe.getData()
-                        self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+                        self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
                         if self.interrupt_measurement_called:
                             break
                     print (i, len(frames))    
@@ -104,7 +106,7 @@ class HamamatsuMeasurement(Measurement):
                     
                     for aframe in frames:
                         self.np_data = aframe.getData()
-                        self.image = np.reshape(self.np_data,(self.camera.subarrayv.val, self.camera.subarrayh.val)).T
+                        self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
                         
                     # print (i, len(frames))    
                     

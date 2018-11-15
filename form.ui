@@ -97,7 +97,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>max</string>
+          <string>min</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_min">
@@ -110,7 +110,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>min</string>
+          <string>max</string>
          </property>
         </widget>
         <zorder>label_max</zorder>

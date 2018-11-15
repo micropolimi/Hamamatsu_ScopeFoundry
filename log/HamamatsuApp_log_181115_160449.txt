@@ -1,0 +1,13 @@
+2018-11-15T16:04:53|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:53|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:53|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:53|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:53|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:53|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:57|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:57|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:04:58|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:05:07|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:05:08|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:05:08|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware
+2018-11-15T16:05:09|WARNING|LoggedQuantity|subarray_hsize read_from_hardware called when not connected to hardware

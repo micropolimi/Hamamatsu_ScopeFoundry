@@ -1,0 +1,33 @@
+2018-11-15T16:06:08|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 697, in setSubarrayH
+    self.setPropertyValue("subarray_hsize", hsize)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 747, in setPropertyValue
+    "dcamprop_setgetvalue")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamprop_setgetvalue ==> DCAMERR_INVALIDPARAM ==> b'0x80000808: dcamdig.dll: Invalid Parameter!'
+
+2018-11-15T16:07:58|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 697, in setSubarrayH
+    self.setPropertyValue("subarray_hsize", hsize)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 747, in setPropertyValue
+    "dcamprop_setgetvalue")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamprop_setgetvalue ==> DCAMERR_INVALIDPARAM ==> b'0x80000808: dcamdig.dll: Invalid Parameter!'
+
+2018-11-15T16:07:59|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 697, in setSubarrayH
+    self.setPropertyValue("subarray_hsize", hsize)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 747, in setPropertyValue
+    "dcamprop_setgetvalue")
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 367, in checkStatus
+    raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+CameraDevice.DCAMException: dcam error in dcamprop_setgetvalue ==> DCAMERR_INVALIDPARAM ==> b'0x80000808: dcamdig.dll: Invalid Parameter!'
+

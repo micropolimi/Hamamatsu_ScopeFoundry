@@ -25,5 +25,4 @@ if __name__ == '__main__':
     import sys
     app = HamamatsuApp(sys.argv)
     sys.exit(app.exec_())
-
     
