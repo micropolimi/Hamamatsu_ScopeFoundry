@@ -76,7 +76,7 @@ class HamamatsuMeasurement(Measurement):
             
     def run(self):
         
-        print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
+        #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
             
             self.camera.hamamatsu.startAcquisition()

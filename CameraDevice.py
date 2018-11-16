@@ -6,7 +6,7 @@
 import ctypes
 import ctypes.util
 import numpy as np
-
+import CameraHardware
 # Hamamatsu constants.
 
 # DCAM4 API.
@@ -271,7 +271,8 @@ class HamamatsuDevice(object):
     Storage for the data from the camera is allocated dynamically and
     copied out of the camera buffers.
     """
-    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, trsource, trmode, trpolarity, camera_id = None, **kwds):
+    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, trsource, trmode, trpolarity, 
+                 subarrayh_pos, subarrayv_pos, camera_id = None, **kwds):
         """
         Open the connection to the camera specified by camera_id.
         """
@@ -330,7 +331,8 @@ class HamamatsuDevice(object):
         self.setTriggerSource(trsource)
         self.setTriggerMode(trmode)
         self.setTriggerPolarity(trpolarity)
-        
+        self.setSubarrayHpos(subarrayh_pos)
+        self.setSubarrayVpos(subarrayv_pos)
 
 
     def captureSetup(self):
@@ -694,22 +696,48 @@ class HamamatsuDevice(object):
         return self.getPropertyValue("exposure_time")[0]
         
     def setSubarrayH(self, hsize):
-        if hsize % 4 != 0:
-            hsize = hsize - hsize%4
+        
+        if hsize % 4 != 0: #If the size is not a multiple of four, is not an allowed value
+            hsize = hsize - hsize%4 #make the size a multiple of four
+            
         self.setPropertyValue("subarray_hsize", hsize)
     
     def getSubarrayH(self):
         
         return self.getPropertyValue("subarray_hsize")[0]
+    
+    def setSubarrayHpos(self, hpos):
         
+        if hpos % 4 != 0: #If the size is not a multiple of four, is not an allowed value
+            hpos = hpos - hpos%4 #make the size a multiple of four
+            
+        self.setPropertyValue("subarray_hpos", hpos)
+    
+    def getSubarrayHpos(self):
+        
+        return self.getPropertyValue("subarray_hpos")[0]
+    
     def setSubarrayV(self, vsize):
+        
         if vsize % 4 != 0:
             vsize = vsize - vsize%4
+        
         self.setPropertyValue("subarray_vsize", vsize)
         
     def getSubarrayV(self):
         
         return self.getPropertyValue("subarray_vsize")[0]
+    
+    def setSubarrayVpos(self, vpos):
+        
+        if vpos % 4 != 0: #If the size is not a multiple of four, is not an allowed value
+            vpos = vpos - vpos%4 #make the size a multiple of four
+            
+        self.setPropertyValue("subarray_vpos", vpos)
+    
+    def getSubarrayVpos(self):
+        
+        return self.getPropertyValue("subarray_vpos")[0]
 
     def setPropertyValue(self, property_name, property_value):
         """
@@ -779,7 +807,7 @@ class HamamatsuDevice(object):
     
     def setNumberImages(self, num_images):
 #       self.stopAcquisition()
-        if num_images < 0:
+        if num_images < 1:
             print("The number of frames can't be less than 0.")
             return None
         else:
@@ -845,6 +873,10 @@ class HamamatsuDevice(object):
             self.camera_handle, ctypes.byref(captureStatus)))
         
         return captureStatus.value
+    
+    def getInternalFrameRate(self):
+        
+        return self.getPropertyValue("internal_frame_rate")[0]
     
     def startAcquisition(self):
         """
