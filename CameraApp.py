@@ -1,3 +1,9 @@
+""" Written by Michele Castriotta, Alessandro Zecchi, Andrea Bassi (Polimi).
+   Code for creating the app class of ScopeFoundry for the Orca Flash 4V3
+   
+   11/18
+"""
+
 from ScopeFoundry import BaseMicroscopeApp
 
 class HamamatsuApp(BaseMicroscopeApp):

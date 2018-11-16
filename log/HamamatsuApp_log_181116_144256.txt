@@ -1,0 +1,72 @@
+2018-11-16T14:43:09|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:09|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:09|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:09|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:10|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:11|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:12|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+
+2018-11-16T14:43:13|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 704, in setSubarrayH
+    self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(hsize))
+  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraDevice.py", line 756, in calculateOptimalPos
+    for i in range(n-1):
+TypeError: 'float' object cannot be interpreted as an integer
+

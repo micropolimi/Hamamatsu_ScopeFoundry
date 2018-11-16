@@ -1,3 +1,9 @@
+""" Written by Michele Castriotta, Alessandro Zecchi, Andrea Bassi (Polimi).
+   Code for creating the measurement class of ScopeFoundry for the Orca Flash 4V3
+   
+   11/18
+"""
+
 from ScopeFoundry import Measurement
 from ScopeFoundry.helper_funcs import sibling_path, load_qt_ui_file
 from ScopeFoundry import h5_io
@@ -80,10 +86,15 @@ class HamamatsuMeasurement(Measurement):
         try:
             
             self.camera.hamamatsu.startAcquisition()
-            
+
             if self.camera.acquisition_mode.val == "fixed_length":
                 
                 for i in range(self.camera.hamamatsu.number_image_buffers):
+                    
+                    """Il ciclo sopra nonha tanto senso, perche nel caso in cui lui acquisisca
+                     piu immagini in un colpo, ho dei cicli inutilizzati (quelli in cui il maxbacklog == 0)
+                     Cambiare e fare in modo da rendere il  codice sensato
+                    """
         
                     # Get frames.
                     [frames, dims] = self.camera.hamamatsu.getFrames()
@@ -91,7 +102,10 @@ class HamamatsuMeasurement(Measurement):
                     # Save frames.
                     for aframe in frames:
                         self.np_data = aframe.getData()
+                        
                         self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+                        pg.image(self.image)
+                        
                         if self.interrupt_measurement_called:
                             break
                     print (i, len(frames))    
@@ -103,6 +117,9 @@ class HamamatsuMeasurement(Measurement):
                     [frames, dims] = self.camera.hamamatsu.getFrames()
             
                     # Save frames.
+                    """
+                    Qui si puo cambiare in modo tale che la camera legga SOLO l'ultimo frame acquisito,
+                    altrimenti non e' un live"""
                     
                     for aframe in frames:
                         self.np_data = aframe.getData()

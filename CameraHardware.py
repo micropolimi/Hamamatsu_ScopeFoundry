@@ -1,3 +1,9 @@
+""" Written by Michele Castriotta, Alessandro Zecchi, Andrea Bassi (Polimi).
+   Code for creating the hardware class of ScopeFoundry for the Orca Flash 4V3.
+   
+   11/18
+"""
+
 from ScopeFoundry import HardwareComponent
 import CameraDevice
 from CameraDevice import HamamatsuDeviceMR, dcam, DCAMERR_NOERROR, DCAMException
@@ -92,11 +98,14 @@ class HamamatsuHardware(HardwareComponent):
         #self.trmode.change_readonly(True)
         #self.trpolarity.change_readonly(True)
         #self.acquisition_mode.change_readonly(True) #if we change from run_till_abort to fixed_length while running it crashes
+        
+        
         self.hamamatsu = HamamatsuDeviceMR(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, 
                                            number_frames=self.number_frames.val, exposure=self.exposure_time.val, 
                                            trsource=self.trsource.val, trmode=self.trmode.val, trpolarity=self.trpolarity.val,
-                                           subarrayh_pos=self.subarrayh_pos.val, subarrayv_pos = self.subarrayv_pos.val) #maybe with more cameras we have to change  
-        
+                                           subarrayh_pos=self.subarrayh_pos.val, subarrayv_pos = self.subarrayv_pos.val,
+                                           hardware = self) #maybe with more cameras we have to change  
+        self.readOnlyWhenOpt(None)
         self.camera.hardware_read_func = self.hamamatsu.getModelInfo
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
         self.submode.hardware_read_func = self.hamamatsu.setSubArrayMode
@@ -121,7 +130,10 @@ class HamamatsuHardware(HardwareComponent):
         self.trmode.hardware_set_func = self.hamamatsu.setTriggerMode
         self.trpolarity.hardware_set_func = self.hamamatsu.setTriggerPolarity
         
+        self.optimal_offset.hardware_set_func = self.readOnlyWhenOpt
+        
         self.read_from_hardware() #read from harrdware at connection
+        
 #         self.subarrayh.update_value(2048)
 #         self.subarrayv.update_value(2048)
 #         self.exposure_time.update_value(0.01)
@@ -147,3 +159,16 @@ class HamamatsuHardware(HardwareComponent):
         for lq in self.settings.as_list():
             lq.hardware_read_func = None
             lq.hardware_set_func = None
+    
+    def readOnlyWhenOpt(self, value):
+        #Done for avoiding the changing of the subarray position in optimal offset mode
+        #The "value" argument has no meaning, but I have to put at least one argument
+        if self.optimal_offset.val:
+            self.subarrayh_pos.change_readonly(True)
+            self.subarrayv_pos.change_readonly(True)
+            self.hamamatsu.setSubarrayHpos(self.hamamatsu.calculateOptimalPos(self.subarrayh.val))
+            self.hamamatsu.setSubarrayVpos(self.hamamatsu.calculateOptimalPos(self.subarrayv.val))
+        else:
+            self.subarrayh_pos.change_readonly(False)
+            self.subarrayv_pos.change_readonly(False)
+            

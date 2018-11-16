@@ -7,6 +7,8 @@ import ctypes
 import ctypes.util
 import numpy as np
 import CameraHardware
+from numpy import log2
+
 # Hamamatsu constants.
 
 # DCAM4 API.
@@ -16,23 +18,29 @@ DCAMERR_NOERROR = 1
 #DCAMERR_INVALIDPARAM = ctypes.c_int32(0x80000808).value #done this way because ctypes convert properly the hexadecimal (I think it's a problem of two complement convention)
 DCAMERR_BUSY = ctypes.c_int32(0x80000101).value
 
-err_dict = {#ctypes.c_int32(0x80000808).value : "DCAMERR_INVALIDPARAM", 
-            #ctypes.c_int32(0x80000101).value : "DCAMERR_BUSY",
-            #ctypes.c_int32(0x80000103).value : "DCAMERR_NOTREADY",
-            #ctypes.c_int32(0x80000104).value : "DCAMERR_NOTSTABLE",
-            #ctypes.c_int32(0x80000105).value : "DCAMERR_UNSTABLE",
-            #ctypes.c_int32(0x80000107).value : "DCAMERR_NOTBUSY",
-            #ctypes.c_int32(0x80000110).value : "DCAMERR_EXCLUDED",
-            #ctypes.c_int32(0x80000302).value : "DCAMERR_COOLINGTROUBLE",
-            #ctypes.c_int32(0x80000303).value : "DCAMERR_NOTRIGGER",
-            #ctypes.c_int32(0x80000304).value : "DCAMERR_TEMPERATURE_TROUBLE",
-            #ctypes.c_int32(0x80000305).value : "DCAMERR_TOOFREQUENTTRIGGER",
-            #ctypes.c_int32(0x80000102).value : "DCAMERR_ABORT",
-            #ctypes.c_int32(0x80000106).value : "DCAMERR_TIMEOUT",
-            #ctypes.c_int32(0x80000301).value : "DCAMERR_LOSTFRAME",
-            #ctypes.c_int32(0x80000f06).value : "DCAMERR_MISSINGFRAME_TROUBLE",
-            0 : "DCAMERR_ERROR"}
-            #ctypes.c_int32(0x80000828).value : "DCAMERR_NOPROPERTY"}
+err_dict = {ctypes.c_int32(0x80000808).value : "DCAMERR_INVALIDPARAM", 
+            ctypes.c_int32(0x80000101).value : "DCAMERR_BUSY",
+            ctypes.c_int32(0x80000103).value : "DCAMERR_NOTREADY",
+            ctypes.c_int32(0x80000104).value : "DCAMERR_NOTSTABLE",
+            ctypes.c_int32(0x80000105).value : "DCAMERR_UNSTABLE",
+            ctypes.c_int32(0x80000107).value : "DCAMERR_NOTBUSY",
+            ctypes.c_int32(0x80000110).value : "DCAMERR_EXCLUDED",
+            ctypes.c_int32(0x80000302).value : "DCAMERR_COOLINGTROUBLE",
+            ctypes.c_int32(0x80000303).value : "DCAMERR_NOTRIGGER",
+            ctypes.c_int32(0x80000304).value : "DCAMERR_TEMPERATURE_TROUBLE",
+            ctypes.c_int32(0x80000305).value : "DCAMERR_TOOFREQUENTTRIGGER",
+            ctypes.c_int32(0x80000102).value : "DCAMERR_ABORT",
+            ctypes.c_int32(0x80000106).value : "DCAMERR_TIMEOUT",
+            ctypes.c_int32(0x80000301).value : "DCAMERR_LOSTFRAME",
+            ctypes.c_int32(0x80000f06).value : "DCAMERR_MISSINGFRAME_TROUBLE",
+            0 : "DCAMERR_ERROR",
+            ctypes.c_int32(0x80000828).value : "DCAMERR_NOPROPERTY",
+            ctypes.c_int32(0x80000822).value : "DCAMERR_OUTOFRANGE",
+            ctypes.c_int32(0x80000827).value : "DCAMERR_WRONGHANDSHAKE",
+            ctypes.c_int32(0x83001002).value : "DCAMERR_FAILREADCAMERA",
+            ctypes.c_int32(0x83001003).value : "DCAMERR_FAILWRITECAMERA",
+            ctypes.c_int32(0x80000828).value : "DCAMERR_NOPROPERTY",
+            ctypes.c_int32(0x80000821).value : "DCAMERR_INVALIDVALUE"}
 
 DCAMPROP_ATTR_HASRANGE = int("0x80000000", 0)
 DCAMPROP_ATTR_HASVALUETEXT = int("0x10000000", 0)
@@ -272,7 +280,7 @@ class HamamatsuDevice(object):
     copied out of the camera buffers.
     """
     def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, trsource, trmode, trpolarity, 
-                 subarrayh_pos, subarrayv_pos, camera_id = None, **kwds):
+                 subarrayh_pos, subarrayv_pos, hardware, camera_id = None, **kwds):
         """
         Open the connection to the camera specified by camera_id.
         """
@@ -290,6 +298,7 @@ class HamamatsuDevice(object):
         self.properties = None
         self.max_backlog = 0
         self.number_image_buffers = 0
+        self.hardware = hardware #to have a communication between hardware and device, I create this attribute
         #dictionaries for trigger properties
         self.trig_dict_source = {"internal":DCAMPROP_TRIGGERSOURCE__INTERNAL, "external":DCAMPROP_TRIGGERSOURCE__EXTERNAL}
         self.trig_dict_mode = {"normal":DCAMPROP_TRIGGER_MODE__NORMAL, "start":DCAMPROP_TRIGGER_MODE__START}
@@ -353,7 +362,7 @@ class HamamatsuDevice(object):
         self.frame_bytes = self.getPropertyValue("image_framebytes")[0]
 
 
-    def checkStatus(self, fn_return, fn_name= "unknown"):
+    def checkStatus(self, fn_return, fn_name= "unknown", dcamproperty = "unknown"):
         """
         Check return value of the dcam function call.
         Throw an error if not as expected?
@@ -367,7 +376,11 @@ class HamamatsuDevice(object):
                                              c_buf,
                                              ctypes.c_int32(c_buf_len))
             #if c_buf.value in err_dict: #if the error is present in the list, we call it by name
-            raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+            #raise DCAMException("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+            if dcamproperty == "unknown":
+                print("dcam error in " + str(fn_name) + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
+            else:
+                print("dcam error in " + str(fn_name) + " for " + dcamproperty + " ==> " + err_dict[fn_return]+ " ==> " + str(c_buf.value) )
             #else:
             #   raise DCAMException("dcam error " + str(fn_name) + " " + str(c_buf.value) + "unknown error")
             #print "dcam error", fn_name, c_buf.value
@@ -699,7 +712,9 @@ class HamamatsuDevice(object):
         
         if hsize % 4 != 0: #If the size is not a multiple of four, is not an allowed value
             hsize = hsize - hsize%4 #make the size a multiple of four
-            
+        if self.hardware.optimal_offset.val:
+            self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(int(hsize)))
+                
         self.setPropertyValue("subarray_hsize", hsize)
     
     def getSubarrayH(self):
@@ -721,7 +736,9 @@ class HamamatsuDevice(object):
         
         if vsize % 4 != 0:
             vsize = vsize - vsize%4
-        
+        if self.hardware.optimal_offset.val:
+            self.setPropertyValue("subarray_vpos", self.calculateOptimalPos(int(vsize)))
+            
         self.setPropertyValue("subarray_vsize", vsize)
         
     def getSubarrayV(self):
@@ -738,6 +755,22 @@ class HamamatsuDevice(object):
     def getSubarrayVpos(self):
         
         return self.getPropertyValue("subarray_vpos")[0]
+    
+    def calculateOptimalPos(self, axis_size):
+        #I have found a kind of algorithm for retrieving the optimal offset from the axis size (I don't know if it is totally true)
+         
+        n = int(log2(2048/axis_size))
+        
+        
+        if n == 0:
+            opt_pos = 0
+            
+        else:
+            opt_pos = 0
+            for i in range(n):
+                opt_pos = opt_pos + 512/2**i
+        
+        return opt_pos
 
     def setPropertyValue(self, property_name, property_value):
         """
@@ -775,7 +808,7 @@ class HamamatsuDevice(object):
                                            ctypes.c_int32(prop_id),
                                            ctypes.byref(p_value),
                                            ctypes.c_int32(DCAM_DEFAULT_ARG)),
-                         "dcamprop_setgetvalue")
+                         "dcamprop_setgetvalue", dcamproperty = property_name)
         
         #if param == DCAMERR_INVALIDPARAM:
         #    actual_val = self.getPropertyValue(property_name)[0]
