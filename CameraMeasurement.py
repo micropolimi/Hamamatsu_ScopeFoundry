@@ -86,10 +86,13 @@ class HamamatsuMeasurement(Measurement):
         try:
             
             self.camera.hamamatsu.startAcquisition()
-
+            
+            index = 0
+            
             if self.camera.acquisition_mode.val == "fixed_length":
                 
-                for i in range(self.camera.hamamatsu.number_image_buffers):
+                #for i in range(self.camera.hamamatsu.number_image_buffers):
+                while index < self.camera.hamamatsu.number_image_buffers:
                     
                     """Il ciclo sopra nonha tanto senso, perche nel caso in cui lui acquisisca
                      piu immagini in un colpo, ho dei cicli inutilizzati (quelli in cui il maxbacklog == 0)
@@ -97,39 +100,38 @@ class HamamatsuMeasurement(Measurement):
                     """
         
                     # Get frames.
+                    #The camera stops acquiring once the buffer is terminated (in snapshot mode)
                     [frames, dims] = self.camera.hamamatsu.getFrames()
-            
+                    
                     # Save frames.
                     for aframe in frames:
-                        self.np_data = aframe.getData()
                         
+                        self.np_data = aframe.getData()  
                         self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-                        pg.image(self.image)
-                        
-                        if self.interrupt_measurement_called:
+                                    
+                        if self.interrupt_measurement_called: #this does not work
                             break
-                    print (i, len(frames))    
+                    
+                    if self.interrupt_measurement_called:
+                        break    
+                    index = index + len(frames)    
                         #np_data.tofile(bin_fp)
             else:
                 
                 while not self.interrupt_measurement_called:
                     
-                    [frames, dims] = self.camera.hamamatsu.getFrames()
+                    [frame, dims] = self.camera.hamamatsu.getLastFrame()
             
                     # Save frames.
                     """
                     Qui si puo cambiare in modo tale che la camera legga SOLO l'ultimo frame acquisito,
                     altrimenti non e' un live"""
-                    
-                    for aframe in frames:
-                        self.np_data = aframe.getData()
-                        self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-                        
+                            
+                    self.np_data = frame.getData()
+                    self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+
                     # print (i, len(frames))    
                     
-                
-                
-
         finally:
             
             self.camera.hamamatsu.stopAcquisition()

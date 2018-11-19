@@ -40,7 +40,17 @@ err_dict = {ctypes.c_int32(0x80000808).value : "DCAMERR_INVALIDPARAM",
             ctypes.c_int32(0x83001002).value : "DCAMERR_FAILREADCAMERA",
             ctypes.c_int32(0x83001003).value : "DCAMERR_FAILWRITECAMERA",
             ctypes.c_int32(0x80000828).value : "DCAMERR_NOPROPERTY",
-            ctypes.c_int32(0x80000821).value : "DCAMERR_INVALIDVALUE"}
+            ctypes.c_int32(0x80000821).value : "DCAMERR_INVALIDVALUE",
+            ctypes.c_int32(0x80000833).value : "DCAMERR_INVALIDFRAMEINDEX",
+            ctypes.c_int32(0x80000829).value : "DCAMERR_INVALIDCHANNEL",
+            ctypes.c_int32(0x8000082a).value : "DCAMERR_INVALIDVIEW",
+            ctypes.c_int32(0x8000082c).value : "DCAMERR_ACCESSDENY",
+            ctypes.c_int32(0x8000082b).value : "DCAMERR_INVALIDSUBARRAY",
+            ctypes.c_int32(0x8000082d).value : "DCAMERR_NOVALUETEXT",
+            ctypes.c_int32(0x8000082e).value : "DCAMERR_WRONGPROPERTYVALUE",
+            ctypes.c_int32(0x80000830).value : "DCAMERR_DISHARMONY",
+            ctypes.c_int32(0x80000832).value : "DCAMERR_FRAMEBUNDLESHOULDBEOFF",
+            ctypes.c_int32(0x80000834).value : "DCAMERR_INVALIDSESSIONINDEX"}
 
 DCAMPROP_ATTR_HASRANGE = int("0x80000000", 0)
 DCAMPROP_ATTR_HASVALUETEXT = int("0x10000000", 0)
@@ -637,7 +647,69 @@ class HamamatsuDevice(object):
             return True
         else:
             return False
+    
+    def newLastFrame(self):
+        """
+        Return a list of the ids of all the new frames since the last check.
+        Returns an empty list if the camera has already stopped and no frames
+        are available.
+    
+        This will block waiting for at least one new frame.
+        """
 
+        captureStatus = ctypes.c_int32(0)
+        self.checkStatus(dcam.dcamcap_status(
+            self.camera_handle, ctypes.byref(captureStatus)))
+
+        # Wait for a new frame if the camera is acquiring.
+        if captureStatus.value == DCAMCAP_STATUS_BUSY:
+            paramstart = DCAMWAIT_START(
+                    0, 
+                    0, 
+                    DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 
+                    1000) #1000 is the timeout. Remember it when changin the tmie exposure
+            paramstart.size = ctypes.sizeof(paramstart)
+            self.checkStatus(dcam.dcamwait_start(self.wait_handle,
+                                            ctypes.byref(paramstart)),
+                             "dcamwait_start")
+
+        # Check how many new frames there are.
+        paramtransfer = DCAMCAP_TRANSFERINFO(
+                0, DCAMCAP_TRANSFERKIND_FRAME, 0, 0)
+        paramtransfer.size = ctypes.sizeof(paramtransfer)
+        self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
+                                               ctypes.byref(paramtransfer)),
+                         "dcamcap_transferinfo")
+        cur_buffer_index = paramtransfer.nNewestFrameIndex
+        cur_frame_number = paramtransfer.nFrameCount
+
+        # Check that we have not acquired more frames than we can store in our buffer.
+        # Keep track of the maximum backlog.
+        backlog = cur_frame_number - self.last_frame_number
+        if (backlog > self.number_image_buffers):
+            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+        if (backlog > self.max_backlog):
+            self.max_backlog = backlog
+        self.last_frame_number = cur_frame_number
+
+
+        # Create a list of the new frames.
+        new_last_frame = cur_buffer_index
+#         if (cur_buffer_index < self.buffer_index):
+#             for i in range(self.buffer_index + 1, self.number_image_buffers):
+#                 new_frames.append(i)
+#             for i in range(cur_buffer_index + 1):
+#                 new_frames.append(i)
+#         else:
+#             for i in range(self.buffer_index, cur_buffer_index):
+#                 new_frames.append(i+1)
+        self.buffer_index = cur_buffer_index
+
+        if self.debug:
+            print(new_last_frame)
+
+        return new_last_frame
+    
     def newFrames(self):
         """
         Return a list of the ids of all the new frames since the last check.
@@ -685,12 +757,13 @@ class HamamatsuDevice(object):
 
         # Create a list of the new frames.
         new_frames = []
-        if (cur_buffer_index < self.buffer_index):
-            for i in range(self.buffer_index + 1, self.number_image_buffers):
+        
+        if (cur_buffer_index < self.buffer_index): #this condition is mainly "False" but sometimes is true, I think when the buffer finishes its space
+            for i in range(self.buffer_index + 1, self.number_image_buffers): #I need to take all the images that were in the remaining buffer
                 new_frames.append(i)
-            for i in range(cur_buffer_index + 1):
+            for i in range(cur_buffer_index + 1): #since the space on the buffer is finished, I restart (cur_index has been "reset")
                 new_frames.append(i)
-        else:
+        else: #executed the vast majority of time
             for i in range(self.buffer_index, cur_buffer_index):
                 new_frames.append(i+1)
         self.buffer_index = cur_buffer_index
@@ -712,10 +785,19 @@ class HamamatsuDevice(object):
         
         if hsize % 4 != 0: #If the size is not a multiple of four, is not an allowed value
             hsize = hsize - hsize%4 #make the size a multiple of four
-        if self.hardware.optimal_offset.val:
-            self.setPropertyValue("subarray_hpos", self.calculateOptimalPos(int(hsize)))
-                
+            
+        """
+        We must reset the value of the offset since sometimes it could happen that
+        the program want to write a value of the offset while it's keeping in memory
+        previous values of size, this coulde lead to an error if the sum of offset 
+        and size overcome 2048
+        """
+        
+        self.setPropertyValue("subarray_hpos", 0) 
         self.setPropertyValue("subarray_hsize", hsize)
+        
+        if self.hardware.optimal_offset.val:
+            self.setSubarrayHpos(self.calculateOptimalPos(int(hsize)))
     
     def getSubarrayH(self):
         
@@ -723,8 +805,23 @@ class HamamatsuDevice(object):
     
     def setSubarrayHpos(self, hpos):
         
+        if hpos == 0: #Necessary for not showing the below message when we are at 2048 (subarray OFF)
+            self.setPropertyValue("subarray_hpos", hpos)
+            return None
+        
+        self.hardware.read_from_hardware() #to read the subarray mode (actually it reads everything)
+        
+        if self.hardware.submode.val == "OFF":
+            print("You must be in subarray mode to change position")
+            return None
+        
         if hpos % 4 != 0: #If the size is not a multiple of four, is not an allowed value
             hpos = hpos - hpos%4 #make the size a multiple of four
+        
+        max = self.getPropertyRange("subarray_hpos")[1] #max value
+        #if vpos > 1020: #If we have 4 pixel of size, the algorithm for the optimal position fails, since the max value for the offset is 1020 (while with 4 pixels it tries to write 1022)
+        if hpos > max:
+            hpos = max
             
         self.setPropertyValue("subarray_hpos", hpos)
     
@@ -736,10 +833,22 @@ class HamamatsuDevice(object):
         
         if vsize % 4 != 0:
             vsize = vsize - vsize%4
-        if self.hardware.optimal_offset.val:
-            self.setPropertyValue("subarray_vpos", self.calculateOptimalPos(int(vsize)))
-            
+        
+        """
+        We must reset the value of the offset since sometimes it could happen that
+        the program want to write a value of the offset while it's keeping in memory
+        previous values of size, this coulde lead to an error if the sum of offset 
+        and size overcome 2048
+        """
+        
+        self.setPropertyValue("subarray_vpos", 0) 
         self.setPropertyValue("subarray_vsize", vsize)
+        
+        if self.hardware.optimal_offset.val:
+
+            self.setSubarrayVpos(self.calculateOptimalPos(int(vsize)))
+            self.getPropertyValue("subarray_vpos")
+        
         
     def getSubarrayV(self):
         
@@ -747,11 +856,26 @@ class HamamatsuDevice(object):
     
     def setSubarrayVpos(self, vpos):
         
+        if vpos == 0: #Necessary for not showing the below message when we are at 2048 (subarray OFF)
+            self.setPropertyValue("subarray_vpos", vpos)
+            return None
+        
+        self.hardware.read_from_hardware() #to read the subarray mode (actually it reads everything)
+        
+        if self.hardware.submode.val == "OFF":
+            print("You must be in subarray mode to change position")
+            return None
+        
         if vpos % 4 != 0: #If the size is not a multiple of four, is not an allowed value
             vpos = vpos - vpos%4 #make the size a multiple of four
             
+        max = self.getPropertyRange("subarray_vpos")[1] #max value
+        #if vpos > 1020: #If we have 4 pixel of size, the algorithm for the optimal position fails, since the max value for the offset is 1020 (while with 4 pixels it tries to write 1022)
+        if vpos > max:
+            vpos = max
+        
         self.setPropertyValue("subarray_vpos", vpos)
-    
+        
     def getSubarrayVpos(self):
         
         return self.getPropertyValue("subarray_vpos")[0]
@@ -761,7 +885,6 @@ class HamamatsuDevice(object):
          
         n = int(log2(2048/axis_size))
         
-        
         if n == 0:
             opt_pos = 0
             
@@ -770,7 +893,7 @@ class HamamatsuDevice(object):
             for i in range(n):
                 opt_pos = opt_pos + 512/2**i
         
-        return opt_pos
+        return int(opt_pos)
 
     def setPropertyValue(self, property_name, property_value):
         """
@@ -809,11 +932,12 @@ class HamamatsuDevice(object):
                                            ctypes.byref(p_value),
                                            ctypes.c_int32(DCAM_DEFAULT_ARG)),
                          "dcamprop_setgetvalue", dcamproperty = property_name)
-        
         #if param == DCAMERR_INVALIDPARAM:
         #    actual_val = self.getPropertyValue(property_name)[0]
         #    raise DCAMException(" The parameter is not valid, the set value is: {}".format(actual_val))
         
+        return p_value.value
+    
     def setSubArrayMode(self):
         """
         This sets the sub-array mode as appropriate based on the current ROI.
@@ -1024,6 +1148,13 @@ class HamamatsuDeviceMR(HamamatsuDevice):
             frames.append(self.hcam_data[n])
 
         return [frames, [self.frame_x, self.frame_y]]
+    
+    def getLastFrame(self):
+        
+        n = self.newLastFrame()
+        frame = self.hcam_data[n]
+        
+        return [frame, [self.frame_x, self.frame_y]]
 
     def startAcquisition(self):
         """
@@ -1040,14 +1171,12 @@ class HamamatsuDeviceMR(HamamatsuDevice):
         # be long enough.
         #
         #backslash is used to escape the newline
-        if (self.old_frame_bytes != self.frame_bytes) or \
-                (self.acquisition_mode is "fixed_length"): 
-
-            n_buffers = min(int((2.0 * 1024 * 1024 * 1024)/self.frame_bytes), 2000)
-            if self.acquisition_mode is "fixed_length":
-                self.number_image_buffers = self.number_frames
-            else:
-                self.number_image_buffers = n_buffers
+        if (self.old_frame_bytes != self.frame_bytes) and (self.acquisition_mode is not "run_till_abort") or \
+                (self.acquisition_mode is "fixed_length"):
+            
+            #n_buffers = min(int((2.0 * 1024 * 1024 * 1024)/self.frame_bytes), 2000)
+                
+            self.number_image_buffers = self.number_frames
 
             # Allocate new image buffers.
             ptr_array = ctypes.c_void_p * self.number_image_buffers #crea un array del tipo c_void_p
@@ -1059,7 +1188,20 @@ class HamamatsuDeviceMR(HamamatsuDevice):
                 self.hcam_data.append(hc_data)
 
             self.old_frame_bytes = self.frame_bytes
+        
+        else:
+            
+            
+            n_buffers = 1
+            self.number_image_buffers = n_buffers
+            ptr_array = ctypes.c_void_p * self.number_image_buffers #crea un array del tipo c_void_p
+            self.hcam_ptr = ptr_array() 
+            self.hcam_data = []
+            hc_data = HCamData(self.frame_bytes)
+            self.hcam_ptr[0] = hc_data.getDataPtr()
+            self.hcam_data.append(hc_data)
 
+            self.old_frame_bytes = self.frame_bytes
         # Attach image buffers and start acquisition.
         #
         # We need to attach & release for each acquisition otherwise

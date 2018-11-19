@@ -105,7 +105,7 @@ class HamamatsuHardware(HardwareComponent):
                                            trsource=self.trsource.val, trmode=self.trmode.val, trpolarity=self.trpolarity.val,
                                            subarrayh_pos=self.subarrayh_pos.val, subarrayv_pos = self.subarrayv_pos.val,
                                            hardware = self) #maybe with more cameras we have to change  
-        self.readOnlyWhenOpt(None)
+        self.readOnlyWhenOpt()
         self.camera.hardware_read_func = self.hamamatsu.getModelInfo
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
         self.submode.hardware_read_func = self.hamamatsu.setSubArrayMode
@@ -160,7 +160,7 @@ class HamamatsuHardware(HardwareComponent):
             lq.hardware_read_func = None
             lq.hardware_set_func = None
     
-    def readOnlyWhenOpt(self, value):
+    def readOnlyWhenOpt(self, value = None):
         #Done for avoiding the changing of the subarray position in optimal offset mode
         #The "value" argument has no meaning, but I have to put at least one argument
         if self.optimal_offset.val:
