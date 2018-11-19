@@ -85,6 +85,7 @@ class HamamatsuMeasurement(Measurement):
         #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
             
+            self.camera.read_from_hardware()
             self.camera.hamamatsu.startAcquisition()
             
             index = 0
@@ -114,8 +115,10 @@ class HamamatsuMeasurement(Measurement):
                     
                     if self.interrupt_measurement_called:
                         break    
-                    index = index + len(frames)    
+                    index = index + len(frames)
                         #np_data.tofile(bin_fp)
+                    self.settings['progress'] = index*100./self.camera.hamamatsu.number_image_buffers
+                    
             else:
                 
                 while not self.interrupt_measurement_called:
@@ -137,7 +140,6 @@ class HamamatsuMeasurement(Measurement):
             self.camera.hamamatsu.stopAcquisition()
 
     def setautoLevels(self, autoLevels):
-       
         self.autoLevels = autoLevels
         
     def setminLevel(self, level_min):

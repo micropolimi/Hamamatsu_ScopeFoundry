@@ -132,7 +132,7 @@ class HamamatsuHardware(HardwareComponent):
         
         self.optimal_offset.hardware_set_func = self.readOnlyWhenOpt
         
-        self.read_from_hardware() #read from harrdware at connection
+        self.read_from_hardware() #read from hardware at connection
         
 #         self.subarrayh.update_value(2048)
 #         self.subarrayv.update_value(2048)

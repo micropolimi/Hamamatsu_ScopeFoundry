@@ -8,7 +8,6 @@ import ctypes.util
 import numpy as np
 import CameraHardware
 from numpy import log2
-
 # Hamamatsu constants.
 
 # DCAM4 API.
@@ -223,7 +222,21 @@ class DCAMPROP_ATTR(ctypes.Structure):
                 ("iProp_NumberOfElement", ctypes.c_int32),
                 ("iProp_ArrayBase", ctypes.c_int32),
                 ("iPropStep_Element", ctypes.c_int32)]
-
+    
+class DCAMREC_OPEN(ctypes.Structure):
+    _fields_ = [("size", ctypes.c_int32),
+                ("reserved", ctypes.c_int32),
+                ("hrec", ctypes.c_void_p),
+                ("path", ctypes.c_wchar_p),
+                ("ext", ctypes.c_wchar_p),
+                ("maxframepersession", ctypes.c_int32),
+                ("userdatasize", ctypes.c_int32),
+                ("userdatasize_session", ctypes.c_int32),
+                ("userdatasize_file", ctypes.c_double),
+                ("usertextsize", ctypes.c_double),
+                ("usertextsize_session", ctypes.c_double),
+                ("usertextsize_file", ctypes.c_double)]
+    
 ## DCAMPROP_VALUETEXT
 #
 # The dcam text property structure.
@@ -809,9 +822,7 @@ class HamamatsuDevice(object):
             self.setPropertyValue("subarray_hpos", hpos)
             return None
         
-        self.hardware.read_from_hardware() #to read the subarray mode (actually it reads everything)
-        
-        if self.hardware.submode.val == "OFF":
+        if self.setSubArrayMode() == "OFF":
             print("You must be in subarray mode to change position")
             return None
         
@@ -860,9 +871,7 @@ class HamamatsuDevice(object):
             self.setPropertyValue("subarray_vpos", vpos)
             return None
         
-        self.hardware.read_from_hardware() #to read the subarray mode (actually it reads everything)
-        
-        if self.hardware.submode.val == "OFF":
+        if self.setSubArrayMode() == "OFF":
             print("You must be in subarray mode to change position")
             return None
         
