@@ -139,9 +139,7 @@ class HamamatsuHardware(HardwareComponent):
 #         self.exposure_time.update_value(0.01)
 #         self.acquisition_mode.update_value("fixed_length")
 #         self.number_frames.update_value(2)
-
-        
-        
+   
     def disconnect(self):
         
         #self.trsource.change_readonly(False)

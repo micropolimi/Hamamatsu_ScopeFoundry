@@ -14,7 +14,7 @@ import time
 
 class HamamatsuMeasurement(Measurement):
     
-    name = "hamamatsu_plot"
+    name = "hamamatsu_image"
     
     def setup(self):
         "..."
@@ -59,8 +59,8 @@ class HamamatsuMeasurement(Measurement):
         self.ui.plot_groupBox.layout().addWidget(self.imv)
         
         # Image intialization
-        self.np_init = np.zeros([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)])
-        self.image = self.np_init
+        self.image = np.zeros([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)],dtype=np.uint16)
+        
         # Create PlotItem object (a set of axes)  
         
     def update_display(self):
@@ -82,6 +82,7 @@ class HamamatsuMeasurement(Measurement):
             
     def run(self):
         
+        
         #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
             
@@ -91,6 +92,20 @@ class HamamatsuMeasurement(Measurement):
             index = 0
             
             if self.camera.acquisition_mode.val == "fixed_length":
+            
+                if self.settings['save_h5']:
+                    self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
+                    self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
+                    img_size=self.image.shape
+                    length=self.camera.hamamatsu.number_image_buffers
+                    self.image_h5 = self.h5_group.create_dataset(name  = 't0/c0/image', 
+                                                                  shape = [ length, img_size[0], img_size[1]],
+                                                                  dtype = self.image.dtype)
+                    #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
+                    self.image_h5.attrs['element_size_um'] =  [1,1,1]
+                    
+                
+            
                 
                 #for i in range(self.camera.hamamatsu.number_image_buffers):
                 while index < self.camera.hamamatsu.number_image_buffers:
@@ -109,13 +124,18 @@ class HamamatsuMeasurement(Measurement):
                         
                         self.np_data = aframe.getData()  
                         self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-                                    
+                        if self.settings['save_h5']:
+                            self.image_h5[index,:,:] = self.image
+                            self.h5file.flush()
+                                            
                         if self.interrupt_measurement_called: #this does not work
                             break
+                        index+=1
+                        print(index)
                     
                     if self.interrupt_measurement_called:
                         break    
-                    index = index + len(frames)
+                    #index = index + len(frames)
                         #np_data.tofile(bin_fp)
                     self.settings['progress'] = index*100./self.camera.hamamatsu.number_image_buffers
                     
@@ -124,20 +144,16 @@ class HamamatsuMeasurement(Measurement):
                 while not self.interrupt_measurement_called:
                     
                     [frame, dims] = self.camera.hamamatsu.getLastFrame()
-            
-                    # Save frames.
-                    """
-                    Qui si puo cambiare in modo tale che la camera legga SOLO l'ultimo frame acquisito,
-                    altrimenti non e' un live"""
-                            
+                                                          
                     self.np_data = frame.getData()
                     self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-
                     # print (i, len(frames))    
                     
         finally:
             
             self.camera.hamamatsu.stopAcquisition()
+            if self.settings['save_h5']:
+                self.h5file.close()        
 
     def setautoLevels(self, autoLevels):
         self.autoLevels = autoLevels
