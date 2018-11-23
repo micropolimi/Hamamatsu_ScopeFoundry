@@ -6,7 +6,7 @@
 
 from ScopeFoundry import HardwareComponent
 import CameraDevice
-from CameraDevice import HamamatsuDeviceMR, dcam, DCAMERR_NOERROR, DCAMException
+from CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, dcam, DCAMERR_NOERROR, DCAMException
 
 
 class HamamatsuHardware(HardwareComponent):
@@ -22,7 +22,8 @@ class HamamatsuHardware(HardwareComponent):
                                                     unit = 'Celsius')
         
         self.exposure_time = self.add_logged_quantity('exposure_time', dtype = float, si = False, ro = 0, 
-                                                       spinbox_decimals = 6, unit = 'sec', initial = 0.01, reread_from_hardware_after_write = True, vmin = 0)
+                                                       spinbox_step = 0.01, spinbox_decimals = 6, unit = 'sec', initial = 0.01, reread_from_hardware_after_write = True,
+                                                       vmin = 0)
         
         self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, ro = 0, 
                                                          choices = ["fixed_length", "run_till_abort"], initial = "fixed_length")
@@ -100,7 +101,7 @@ class HamamatsuHardware(HardwareComponent):
         #self.acquisition_mode.change_readonly(True) #if we change from run_till_abort to fixed_length while running it crashes
         
         
-        self.hamamatsu = HamamatsuDeviceMR(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, 
+        self.hamamatsu = HamamatsuDevice(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, 
                                            number_frames=self.number_frames.val, exposure=self.exposure_time.val, 
                                            trsource=self.trsource.val, trmode=self.trmode.val, trpolarity=self.trpolarity.val,
                                            subarrayh_pos=self.subarrayh_pos.val, subarrayv_pos = self.subarrayv_pos.val,

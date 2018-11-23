@@ -6,6 +6,7 @@
 import ctypes
 import ctypes.util
 import numpy as np
+import time
 import CameraHardware
 from numpy import log2
 # Hamamatsu constants.
@@ -455,33 +456,8 @@ class HamamatsuDevice(object):
                              "dcamprop_getname")
         return properties
 
-    def getFrames(self):
-        """
-        Gets all of the available frames.
     
-        This will block waiting for new frames even if 
-        there new frames available when it is called.
-        """
-        frames = []
-        for n in self.newFrames():
-
-            paramlock = DCAMBUF_FRAME(
-                    0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-            paramlock.size = ctypes.sizeof(paramlock)    
-
-            # Lock the frame in the camera buffer & get address.
-            self.checkStatus(dcam.dcambuf_lockframe(self.camera_handle,
-                                                ctypes.byref(paramlock)),
-                             "dcambuf_lockframe")
-
-            # Create storage for the frame & copy into this storage.
-            hc_data = HCamData(self.frame_bytes)
-            hc_data.copyData(paramlock.buf)
-
-            frames.append(hc_data)
-
-
-        return [frames, [self.frame_x, self.frame_y]]
+    
 
     def getModelInfo(self):
         """
@@ -661,15 +637,8 @@ class HamamatsuDevice(object):
         else:
             return False
     
-    def newLastFrame(self):
-        """
-        Return a list of the ids of all the new frames since the last check.
-        Returns an empty list if the camera has already stopped and no frames
-        are available.
-    
-        This will block waiting for at least one new frame.
-        """
-
+    def getTransferInfo(self):
+        
         captureStatus = ctypes.c_int32(0)
         self.checkStatus(dcam.dcamcap_status(
             self.camera_handle, ctypes.byref(captureStatus)))
@@ -693,35 +662,9 @@ class HamamatsuDevice(object):
         self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
                                                ctypes.byref(paramtransfer)),
                          "dcamcap_transferinfo")
-        cur_buffer_index = paramtransfer.nNewestFrameIndex
-        cur_frame_number = paramtransfer.nFrameCount
-
-        # Check that we have not acquired more frames than we can store in our buffer.
-        # Keep track of the maximum backlog.
-        backlog = cur_frame_number - self.last_frame_number
-        if (backlog > self.number_image_buffers):
-            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
-        if (backlog > self.max_backlog):
-            self.max_backlog = backlog
-        self.last_frame_number = cur_frame_number
-
-
-        # Create a list of the new frames.
-        new_last_frame = cur_buffer_index
-#         if (cur_buffer_index < self.buffer_index):
-#             for i in range(self.buffer_index + 1, self.number_image_buffers):
-#                 new_frames.append(i)
-#             for i in range(cur_buffer_index + 1):
-#                 new_frames.append(i)
-#         else:
-#             for i in range(self.buffer_index, cur_buffer_index):
-#                 new_frames.append(i+1)
-        self.buffer_index = cur_buffer_index
-
-        if self.debug:
-            print(new_last_frame)
-
-        return new_last_frame
+        
+        return paramtransfer.nNewestFrameIndex, paramtransfer.nFrameCount
+        
     
     def newFrames(self):
         """
@@ -785,6 +728,225 @@ class HamamatsuDevice(object):
             print(new_frames)
 
         return new_frames
+    
+    def newestFrame(self):
+        
+        """
+        Equal to newFrames, but we only return the index of the last frame.
+        """
+        
+        captureStatus = ctypes.c_int32(0)
+        self.checkStatus(dcam.dcamcap_status(
+            self.camera_handle, ctypes.byref(captureStatus)))
+
+        # Wait for a new frame if the camera is acquiring.
+        if captureStatus.value == DCAMCAP_STATUS_BUSY:
+            paramstart = DCAMWAIT_START(
+                    0, 
+                    0, 
+                    DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 
+                    1000) #1000 is the timeout. Remember it when changin the tmie exposure
+            paramstart.size = ctypes.sizeof(paramstart)
+            self.checkStatus(dcam.dcamwait_start(self.wait_handle,
+                                            ctypes.byref(paramstart)),
+                             "dcamwait_start")
+
+        # Check how many new frames there are.
+        paramtransfer = DCAMCAP_TRANSFERINFO(
+                0, DCAMCAP_TRANSFERKIND_FRAME, 0, 0)
+        paramtransfer.size = ctypes.sizeof(paramtransfer)
+        self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
+                                               ctypes.byref(paramtransfer)),
+                         "dcamcap_transferinfo")
+        
+        cur_buffer_index = paramtransfer.nNewestFrameIndex
+        cur_frame_number = paramtransfer.nFrameCount
+
+        # Check that we have not acquired more frames than we can store in our buffer.
+        # Keep track of the maximum backlog.
+        backlog = cur_frame_number - self.last_frame_number
+        if (backlog > self.number_image_buffers):
+            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+        if (backlog > self.max_backlog):
+            self.max_backlog = backlog
+        self.last_frame_number = cur_frame_number
+
+
+        # Create a list of the new frames.
+        newest_frame_index = cur_buffer_index
+        self.buffer_index = cur_buffer_index
+
+        if self.debug:
+            print(newest_frame_index)
+
+        return newest_frame_index
+    
+    def newestFrameThreshold(self):
+        
+        """
+        Equal to newFrames, but we only return the index of the last frame.
+        """
+        
+        cur_buffer_index, cur_frame_number = self.getTransferInfo()
+
+        # Check that we have not acquired more frames than we can store in our buffer.
+        # Keep track of the maximum backlog.
+        backlog = cur_frame_number - self.last_frame_number
+        if (backlog > self.number_image_buffers):
+            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+        if (backlog > self.max_backlog):
+            self.max_backlog = backlog
+        self.last_frame_number = cur_frame_number
+        
+        newest_frame_index = cur_buffer_index
+        self.buffer_index = cur_buffer_index
+        
+        newest_frame = self.getRequiredFrame(newest_frame_index)[0]
+        total = np.sum(newest_frame.getData()) #the sum over all pixels, to check if it's above threshold
+        
+        new_frames = []
+        
+        if total > 300*self.frame_x*self.frame_y: #300 is just a number (we have seen that with noise the average value of pixel is 100)
+            
+            upgraded_newest_frame_index = self.newestFrame()
+            
+            if upgraded_newest_frame_index > newest_frame_index:
+                
+                if upgraded_newest_frame_index - newest_frame_index > 200:
+                    
+                    for i in range(newest_frame_index, newest_frame_index + 200):
+                        
+                        new_frames.append(self.getRequiredFrame(i))
+                
+                else:
+                    
+                    for i in range(newest_frame_index, upgraded_newest_frame_index + 1):
+                        
+                        new_frames.append(self.getRequiredFrame(i))
+                    
+                    while paramtransfer.nNewestFrameIndex < 199 + newest_frame_index: 
+                        
+                        temp = self
+                        
+                        for i in range(upgraded_newest_frame_index + 1, paramtransfer.nNewestFrameIndex + 1):
+                            
+                            new_frames.append(self.getRequiredFrame(i))
+                            if len(new_frames) >= 200:
+                                break
+                            
+                            
+                        upgraded_newest_frame_index = paramtransfer.nNewestFrameIndex
+                        
+                        
+                            
+                            
+                        
+        
+        
+        
+        
+        if (cur_buffer_index < self.buffer_index): #this condition is mainly "False" but sometimes is true, I think when the buffer finishes its space
+            for i in range(self.buffer_index + 1, self.number_image_buffers): #I need to take all the images that were in the remaining buffer
+                new_frames.append(i)
+            for i in range(cur_buffer_index + 1): #since the space on the buffer is finished, I restart (cur_index has been "reset")
+                new_frames.append(i)
+        else: #executed the vast majority of time
+            for i in range(self.buffer_index, cur_buffer_index):
+                new_frames.append(i+1)
+        
+
+        if self.debug:
+            print(new_frames)
+
+
+        # Create a list of the new frames.
+        
+
+        if self.debug:
+            print(newest_frame_index)
+
+        return newest_frame_index
+    
+    def getFrames(self):
+        """
+        Gets all of the available frames.
+    
+        This will block waiting for new frames even if 
+        there new frames available when it is called.
+        """
+        frames = []
+        for n in self.newFrames():
+
+            paramlock = DCAMBUF_FRAME(
+                    0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            paramlock.size = ctypes.sizeof(paramlock)    
+
+            # Lock the frame in the camera buffer & get address.
+            self.checkStatus(dcam.dcambuf_lockframe(self.camera_handle,
+                                                ctypes.byref(paramlock)),
+                             "dcambuf_lockframe")
+
+            # Create storage for the frame & copy into this storage.
+            hc_data = HCamData(self.frame_bytes)
+            hc_data.copyData(paramlock.buf)
+
+            frames.append(hc_data)
+
+
+        return [frames, [self.frame_x, self.frame_y]]
+    
+    def getNewestFrame(self):
+        """
+        Gets only the newest frame available.
+    
+        """
+        
+        #frames = []
+        
+        n = self.newestFrame()
+
+        paramlock = DCAMBUF_FRAME(
+                0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        paramlock.size = ctypes.sizeof(paramlock)    
+
+        # Lock the frame in the camera buffer & get address.
+        self.checkStatus(dcam.dcambuf_lockframe(self.camera_handle,
+                                            ctypes.byref(paramlock)),
+                         "dcambuf_lockframe")
+
+        # Create storage for the frame & copy into this storage.
+        hc_data = HCamData(self.frame_bytes)
+        hc_data.copyData(paramlock.buf)
+
+        frames = hc_data
+
+
+        return [frames, [self.frame_x, self.frame_y]]
+    
+    def getRequiredFrame(self, required_index):
+        
+        """
+        Gets the frame at the required index
+        """
+        
+        n = required_index
+
+        paramlock = DCAMBUF_FRAME(
+                0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        paramlock.size = ctypes.sizeof(paramlock)    
+
+        # Lock the frame in the camera buffer & get address.
+        self.checkStatus(dcam.dcambuf_lockframe(self.camera_handle,
+                                            ctypes.byref(paramlock)),
+                         "dcambuf_lockframe")
+
+        # Create storage for the frame & copy into this storage.
+        hc_data = HCamData(self.frame_bytes)
+        hc_data.copyData(paramlock.buf)
+
+        frames = hc_data
+
+        return [frames, [self.frame_x, self.frame_y]]
     
     def setExposure(self, exposure):
         
@@ -974,7 +1136,7 @@ class HamamatsuDevice(object):
     def setNumberImages(self, num_images):
 #       self.stopAcquisition()
         if num_images < 1:
-            print("The number of frames can't be less than 0.")
+            print("The number of frames can't be less than 1.")
             return None
         else:
             self.number_frames = num_images
@@ -1056,7 +1218,8 @@ class HamamatsuDevice(object):
         # number of frames for a fixed length acquisition
         #
         if self.acquisition_mode is "run_till_abort":
-            n_buffers = int(20.0*self.getPropertyValue("internal_frame_rate")[0])
+            #n_buffers = int(20.0*self.getPropertyValue("internal_frame_rate")[0])
+            n_buffers = 1
         elif self.acquisition_mode is "fixed_length":
             n_buffers = self.number_frames
 
@@ -1141,6 +1304,70 @@ class HamamatsuDeviceMR(HamamatsuDevice):
         self.old_frame_bytes = -1
 
         #self.setPropertyValue("output_trigger_kind[0]", 2)
+    
+    def newestFrame(self):
+        """
+        Return a list of the ids of all the new frames since the last check.
+        Returns an empty list if the camera has already stopped and no frames
+        are available.
+    
+        This will block waiting for at least one new frame.
+        """
+
+        captureStatus = ctypes.c_int32(0)
+        self.checkStatus(dcam.dcamcap_status(
+            self.camera_handle, ctypes.byref(captureStatus)))
+
+        # Wait for a new frame if the camera is acquiring.
+        if captureStatus.value == DCAMCAP_STATUS_BUSY:
+            paramstart = DCAMWAIT_START(
+                    0, 
+                    0, 
+                    DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 
+                    1000) #1000 is the timeout. Remember it when changin the tmie exposure
+            paramstart.size = ctypes.sizeof(paramstart)
+            self.checkStatus(dcam.dcamwait_start(self.wait_handle,
+                                            ctypes.byref(paramstart)),
+                             "dcamwait_start")
+
+        # Check how many new frames there are.
+        paramtransfer = DCAMCAP_TRANSFERINFO(
+                0, DCAMCAP_TRANSFERKIND_FRAME, 0, 0)
+        paramtransfer.size = ctypes.sizeof(paramtransfer)
+        self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
+                                               ctypes.byref(paramtransfer)),
+                         "dcamcap_transferinfo")
+        cur_buffer_index = paramtransfer.nNewestFrameIndex
+        
+        cur_frame_number = paramtransfer.nFrameCount
+        
+
+        # Check that we have not acquired more frames than we can store in our buffer.
+        # Keep track of the maximum backlog.
+        backlog = cur_frame_number - self.last_frame_number
+        #if (backlog > self.number_image_buffers):
+            #print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+        if (backlog > self.max_backlog):
+            self.max_backlog = backlog
+        self.last_frame_number = cur_frame_number
+
+
+        # Create a list of the new frames.
+        new_last_frame = cur_buffer_index
+#         if (cur_buffer_index < self.buffer_index):
+#             for i in range(self.buffer_index + 1, self.number_image_buffers):
+#                 new_frames.append(i)
+#             for i in range(cur_buffer_index + 1):
+#                 new_frames.append(i)
+#         else:
+#             for i in range(self.buffer_index, cur_buffer_index):
+#                 new_frames.append(i+1)
+        self.buffer_index = cur_buffer_index
+
+        #if self.debug:
+        #    print(new_last_frame)
+
+        #return new_last_frame
 
     def getFrames(self):
         """
@@ -1158,10 +1385,10 @@ class HamamatsuDeviceMR(HamamatsuDevice):
 
         return [frames, [self.frame_x, self.frame_y]]
     
-    def getLastFrame(self):
+    def getNewestFrame(self):
         
-        n = self.newLastFrame()
-        frame = self.hcam_data[n]
+        self.newestFrame()
+        frame = self.hcam_data[0]
         
         return [frame, [self.frame_x, self.frame_y]]
 

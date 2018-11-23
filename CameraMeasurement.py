@@ -99,8 +99,15 @@ class HamamatsuMeasurement(Measurement):
                     img_size=self.image.shape
                     length=self.camera.hamamatsu.number_image_buffers
                     self.image_h5 = self.h5_group.create_dataset(name  = 't0/c0/image', 
-                                                                  shape = [ length, img_size[0], img_size[1]],
-                                                                  dtype = self.image.dtype)
+                                                                  shape = ( length, img_size[0], img_size[1]),
+                                                                  dtype = self.image.dtype,
+                                                                  )
+                    """
+                    THESE NAMES MUST BE CHANGED
+                    """
+                    self.image_h5.dims[0].label = "z"
+                    self.image_h5.dims[1].label = "x"
+                    self.image_h5.dims[1].label = "y"
                     #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
                     self.image_h5.attrs['element_size_um'] =  [1,1,1]
                     
@@ -125,10 +132,10 @@ class HamamatsuMeasurement(Measurement):
                         self.np_data = aframe.getData()  
                         self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
                         if self.settings['save_h5']:
-                            self.image_h5[index,:,:] = self.image
-                            self.h5file.flush()
+                            self.image_h5[index,:,:] = self.image # saving to the h5 dataset
+                            self.h5file.flush() # maybe is not necessary
                                             
-                        if self.interrupt_measurement_called: #this does not work
+                        if self.interrupt_measurement_called:
                             break
                         index+=1
                         print(index)
@@ -143,9 +150,12 @@ class HamamatsuMeasurement(Measurement):
                 
                 while not self.interrupt_measurement_called:
                     
-                    [frame, dims] = self.camera.hamamatsu.getLastFrame()
+                    [frame, dims] = self.camera.hamamatsu.getNewestFrame()
                                                           
                     self.np_data = frame.getData()
+                    
+                    #print(self.np_data)
+                    
                     self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
                     # print (i, len(frames))    
                     
@@ -153,7 +163,7 @@ class HamamatsuMeasurement(Measurement):
             
             self.camera.hamamatsu.stopAcquisition()
             if self.settings['save_h5']:
-                self.h5file.close()        
+                self.h5file.close() # close connection     
 
     def setautoLevels(self, autoLevels):
         self.autoLevels = autoLevels
