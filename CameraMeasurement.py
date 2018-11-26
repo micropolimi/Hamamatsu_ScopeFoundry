@@ -28,6 +28,7 @@ class HamamatsuMeasurement(Measurement):
         self.settings.New('autoLevels', dtype=bool, initial=True, hardware_set_func=self.setautoLevels)
         self.settings.New('level_min', dtype=int, initial=60, hardware_set_func=self.setminLevel)
         self.settings.New('level_max', dtype=int, initial=150, hardware_set_func=self.setmaxLevel)
+        self.settings.New('threshold', dtype=int, initial=500, hardware_set_func=self.setThreshold)
         self.camera = self.app.hardware['HamamatsuHardware']
         
         self.display_update_period = self.settings.refresh_period.val
@@ -49,7 +50,7 @@ class HamamatsuMeasurement(Measurement):
         self.ui.interrupt_pushButton.clicked.connect(self.interrupt)
         self.settings.save_h5.connect_to_widget(self.ui.save_h5_checkBox)
         
-        # coonect ui widgets of live settings
+        # connect ui widgets of live settings
         self.settings.autoLevels.connect_to_widget(self.ui.autoLevels_checkBox)
         self.settings.level_min.connect_to_widget(self.ui.min_doubleSpinBox) #spinBox doesn't work nut it would be better
         self.settings.level_max.connect_to_widget(self.ui.max_doubleSpinBox) #spinBox doesn't work nut it would be better
@@ -58,7 +59,7 @@ class HamamatsuMeasurement(Measurement):
         self.imv = pg.ImageView()
         self.ui.plot_groupBox.layout().addWidget(self.imv)
         
-        # Image intialization
+        # Image initialization
         self.image = np.zeros([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)],dtype=np.uint16)
         
         # Create PlotItem object (a set of axes)  
@@ -82,7 +83,8 @@ class HamamatsuMeasurement(Measurement):
             
     def run(self):
         
-        
+        self.image = np.empty([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)],dtype=np.uint16)
+        self.image[0,0]=1 #........
         #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
             
@@ -94,33 +96,10 @@ class HamamatsuMeasurement(Measurement):
             if self.camera.acquisition_mode.val == "fixed_length":
             
                 if self.settings['save_h5']:
-                    self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
-                    self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
-                    img_size=self.image.shape
-                    length=self.camera.hamamatsu.number_image_buffers
-                    self.image_h5 = self.h5_group.create_dataset(name  = 't0/c0/image', 
-                                                                  shape = ( length, img_size[0], img_size[1]),
-                                                                  dtype = self.image.dtype,
-                                                                  )
-                    """
-                    THESE NAMES MUST BE CHANGED
-                    """
-                    self.image_h5.dims[0].label = "z"
-                    self.image_h5.dims[1].label = "x"
-                    self.image_h5.dims[1].label = "y"
-                    #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
-                    self.image_h5.attrs['element_size_um'] =  [1,1,1]
+                    self.initH5()
                     
-                
-            
-                
                 #for i in range(self.camera.hamamatsu.number_image_buffers):
                 while index < self.camera.hamamatsu.number_image_buffers:
-                    
-                    """Il ciclo sopra nonha tanto senso, perche nel caso in cui lui acquisisca
-                     piu immagini in un colpo, ho dei cicli inutilizzati (quelli in cui il maxbacklog == 0)
-                     Cambiare e fare in modo da rendere il  codice sensato
-                    """
         
                     # Get frames.
                     #The camera stops acquiring once the buffer is terminated (in snapshot mode)
@@ -130,7 +109,7 @@ class HamamatsuMeasurement(Measurement):
                     for aframe in frames:
                         
                         self.np_data = aframe.getData()  
-                        self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+                        self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T # T is faster. Why?
                         if self.settings['save_h5']:
                             self.image_h5[index,:,:] = self.image # saving to the h5 dataset
                             self.h5file.flush() # maybe is not necessary
@@ -146,18 +125,105 @@ class HamamatsuMeasurement(Measurement):
                         #np_data.tofile(bin_fp)
                     self.settings['progress'] = index*100./self.camera.hamamatsu.number_image_buffers
                     
-            else:
+            elif self.camera.acquisition_mode.val == "run_till_abort":
+                
+                save = 0
                 
                 while not self.interrupt_measurement_called:
                     
-                    [frame, dims] = self.camera.hamamatsu.getNewestFrame()
-                                                          
+                    [frame, dims] = self.camera.hamamatsu.getNewestFrame()        
                     self.np_data = frame.getData()
-                    
-                    #print(self.np_data)
-                    
                     self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-                    # print (i, len(frames))    
+                    
+                    if self.settings['save_h5']:
+                        
+                        if save == 0:
+                            self.initH5()
+                            save = 1 #at next cycle, we dont do initH5 again (we have already created the file)
+                        
+                        total = np.sum(self.np_data)
+                        frames = []
+                        newest_frame_index = self.camera.hamamatsu.buffer_index
+                        
+                        if total > self.settings['threshold']*self.camera.hamamatsu.frame_x*self.camera.hamamatsu.frame_y:
+                            print("\n \n ******* \n \n Saving :D !\n \n *******")
+                            j = 0
+                            
+                            while(len(frames)) < self.camera.number_frames.val: #we want 200 frames
+                                upgraded_newest_frame_index, upgraded_frame_number = self.camera.hamamatsu.getTransferInfo() #we upgrade the transfer information
+                                
+                                if newest_frame_index < upgraded_newest_frame_index: #acquisition has not reached yet the end of the buffer    
+                                
+                                    for i in range(newest_frame_index, upgraded_newest_frame_index + 1):
+                                        
+                                        if j < self.camera.number_frames.val:
+                                            frames.append(self.camera.hamamatsu.getRequiredFrame(i)[0])
+                                            self.np_data = frames[-1].getData() #-1 takes the last element
+                                            self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+                                            self.image_h5[j,:,:] = self.image # saving to the h5 dataset
+                                            j+=1
+                                
+                                else: #acquisition has reached the end of the buffer
+                                    
+                                    for i in range(newest_frame_index, self.camera.hamamatsu.number_image_buffers + 1):
+                                        #put elements in new_frames until the end of buffer
+                                        if j < self.camera.number_frames.val:
+                                            frames.append(self.camera.hamamatsu.getRequiredFrame(i)[0])
+                                            self.np_data = frames[-1].getData()
+                                            self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+                                            self.image_h5[j,:,:] = self.image # saving to the h5 dataset
+                                            j+=1
+                                    
+                                    for i in range(upgraded_newest_frame_index):
+                                        #put elements in new_frames until the new index
+                                        if j < self.camera.number_frames.val:
+                                            frames.append(self.camera.hamamatsu.getRequiredFrame(i)[0])
+                                            self.np_data = frames[-1].getData()
+                                            self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+                                            self.image_h5[j,:,:] = self.image # saving to the h5 dataset
+                                            j+=1
+                                
+                                newest_frame_index = upgraded_newest_frame_index
+                                
+                            self.interrupt()
+                        
+            
+#             elif self.camera.acquisition_mode.val == "Threshold_h5":
+#                 
+#                 if self.settings['save_h5']:
+#                     self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
+#                     self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
+#                     img_size=self.image.shape
+#                     length=400
+#                     self.image_h5 = self.h5_group.create_dataset(name  = 't0/c0/image', 
+#                                                                   shape = ( length, img_size[0], img_size[1]),
+#                                                                   dtype = self.image.dtype,
+#                                                                   )
+#                     """
+#                     THESE NAMES MUST BE CHANGED
+#                     """
+#                     self.image_h5.dims[0].name = "z"
+#                     self.image_h5.dims[1].label = "x"
+#                     self.image_h5.dims[2].label = "y"
+#                     #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
+#                     self.image_h5.attrs['element_size_um'] =  [1,1,1]
+#                 
+#                 len_frames = 0
+#                 
+#                 while not self.interrupt_measurement_called:
+#                     
+#                     frames, len_frames = self.camera.hamamatsu.getNewestFrameThreshold()
+#                     if self.interrupt_measurement_called:
+#                         break
+#                     j=0
+#                     for aframe in frames:
+#                         
+#                         self.np_data = aframe.getData()
+#                         self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+#                             
+#                         if self.interrupt_measurement_called:
+#                             break
+#                         j+=1
                     
         finally:
             
@@ -173,3 +239,26 @@ class HamamatsuMeasurement(Measurement):
         
     def setmaxLevel(self, level_max):
         self.level_max = level_max
+        
+    def setThreshold(self, threshold):
+        self.threshold = threshold
+        
+    def initH5(self):
+        
+        self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
+        self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
+        img_size=self.image.shape
+        length=self.camera.hamamatsu.number_image_buffers
+        self.image_h5 = self.h5_group.create_dataset(name  = 't0/c0/image', 
+                                                      shape = ( length, img_size[0], img_size[1]),
+                                                      dtype = self.image.dtype,
+                                                      )
+        """
+        THESE NAMES MUST BE CHANGED
+        """
+        self.image_h5.dims[0].label = 'z'
+        self.image_h5.dims[1].label = "x"
+        self.image_h5.dims[2].label = "y"
+        
+        #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
+        self.image_h5.attrs['element_size_um'] =  [1,1,1]

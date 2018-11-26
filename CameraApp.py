@@ -10,6 +10,11 @@ class HamamatsuApp(BaseMicroscopeApp):
     
     name = 'HamamatsuApp'
     
+    def __init__(self, *kwds):
+        
+        super().__init__(*kwds)
+        self.settings['save_dir'] = "D:\Data"
+    
     def setup(self):
         
         from CameraHardware import HamamatsuHardware

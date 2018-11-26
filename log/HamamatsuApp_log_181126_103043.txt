@@ -1,0 +1,464 @@
+2018-11-26T10:30:49|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:49|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:49|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:50|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 182, in run
+    frames = self.camera.hamamatsu.getNewestFrameThreshold()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraDevice.py", line 754, in getNewestFrameThreshold
+    newest_frame = self.getRequiredFrame(newest_frame_index)[0]
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraDevice.py", line 924, in getRequiredFrame
+    hc_data.copyData(paramlock.buf)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraDevice.py", line 289, in copyData
+    ctypes.memmove(self.np_array.ctypes.data, address, self.size) #copies self.size bytes from address into self.np_array.ctyps.data
+OSError: exception: access violation reading 0x0000000000000000
+
+2018-11-26T10:30:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:21|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:22|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 182, in run
+    frames = self.camera.hamamatsu.getNewestFrameThreshold()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraDevice.py", line 754, in getNewestFrameThreshold
+    newest_frame = self.getRequiredFrame(newest_frame_index)[0]
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraDevice.py", line 924, in getRequiredFrame
+    hc_data.copyData(paramlock.buf)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraDevice.py", line 289, in copyData
+    ctypes.memmove(self.np_array.ctypes.data, address, self.size) #copies self.size bytes from address into self.np_array.ctyps.data
+OSError: exception: access violation reading 0x0000000000000000
+
+2018-11-26T10:31:23|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\HistogramLUTItem.py", line 195, in imageChanged
+    h = self.imageItem().getHistogram()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\pyqtgraph\graphicsItems\ImageItem.py", line 464, in getHistogram
+    bins = np.arange(mn, mx+1.01*step, step, dtype=np.int)
+ValueError: arange: cannot compute length
+
