@@ -33,7 +33,6 @@ err_dict = {ctypes.c_int32(0x80000808).value : "DCAMERR_INVALIDPARAM",
             ctypes.c_int32(0x80000106).value : "DCAMERR_TIMEOUT",
             ctypes.c_int32(0x80000301).value : "DCAMERR_LOSTFRAME",
             ctypes.c_int32(0x80000f06).value : "DCAMERR_MISSINGFRAME_TROUBLE",
-            0 : "DCAMERR_ERROR",
             ctypes.c_int32(0x80000828).value : "DCAMERR_NOPROPERTY",
             ctypes.c_int32(0x80000822).value : "DCAMERR_OUTOFRANGE",
             ctypes.c_int32(0x80000827).value : "DCAMERR_WRONGHANDSHAKE",
@@ -50,7 +49,8 @@ err_dict = {ctypes.c_int32(0x80000808).value : "DCAMERR_INVALIDPARAM",
             ctypes.c_int32(0x8000082e).value : "DCAMERR_WRONGPROPERTYVALUE",
             ctypes.c_int32(0x80000830).value : "DCAMERR_DISHARMONY",
             ctypes.c_int32(0x80000832).value : "DCAMERR_FRAMEBUNDLESHOULDBEOFF",
-            ctypes.c_int32(0x80000834).value : "DCAMERR_INVALIDSESSIONINDEX"}
+            ctypes.c_int32(0x80000834).value : "DCAMERR_INVALIDSESSIONINDEX",
+            0 : "DCAMERR_ERROR"}
 
 DCAMPROP_ATTR_HASRANGE = int("0x80000000", 0)
 DCAMPROP_ATTR_HASVALUETEXT = int("0x10000000", 0)
@@ -662,18 +662,23 @@ class HamamatsuDevice(object):
         self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
                                                ctypes.byref(paramtransfer)),
                          "dcamcap_transferinfo")
-#         cur_buffer_index = paramtransfer.nNewestFrameIndex
-#         cur_frame_number = paramtransfer.nFrameCount
-#         
-#         backlog = cur_frame_number - self.last_frame_number
-#         if (backlog > self.number_image_buffers):
-#             print(">> Warning! hamamatsu camera frame buffer overrun detected!")
-#         if (backlog > self.max_backlog):
-#             self.max_backlog = backlog
-#         self.last_frame_number = cur_frame_number
-#         
-#         return cur_buffer_index, cur_frame_number
-        return paramtransfer.nNewestFrameIndex, paramtransfer.nFrameCount
+        
+        """
+        Put also the backlog in transfer info
+        """
+        
+        
+        cur_buffer_index = paramtransfer.nNewestFrameIndex
+        cur_frame_number = paramtransfer.nFrameCount
+          
+        backlog = cur_frame_number - self.last_frame_number
+        if (backlog > self.number_image_buffers):
+            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+        if (backlog > self.max_backlog):
+            self.max_backlog = backlog
+        self.last_frame_number = cur_frame_number
+          
+        return cur_buffer_index, cur_frame_number
         
     
     def newFrames(self):
@@ -689,12 +694,12 @@ class HamamatsuDevice(object):
 
         # Check that we have not acquired more frames than we can store in our buffer.
         # Keep track of the maximum backlog.
-        backlog = cur_frame_number - self.last_frame_number
-        if (backlog > self.number_image_buffers):
-            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
-        if (backlog > self.max_backlog):
-            self.max_backlog = backlog
-        self.last_frame_number = cur_frame_number
+#         backlog = cur_frame_number - self.last_frame_number
+#         if (backlog > self.number_image_buffers):
+#             print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+#         if (backlog > self.max_backlog):
+#             self.max_backlog = backlog
+#         self.last_frame_number = cur_frame_number
 
 
         # Create a list of the new frames.
@@ -725,12 +730,12 @@ class HamamatsuDevice(object):
 
         # Check that we have not acquired more frames than we can store in our buffer.
         # Keep track of the maximum backlog.
-        backlog = cur_frame_number - self.last_frame_number
-        if (backlog > self.number_image_buffers):
-            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
-        if (backlog > self.max_backlog):
-            self.max_backlog = backlog
-        self.last_frame_number = cur_frame_number
+#         backlog = cur_frame_number - self.last_frame_number
+#         if (backlog > self.number_image_buffers):
+#             print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+#         if (backlog > self.max_backlog):
+#             self.max_backlog = backlog
+#         self.last_frame_number = cur_frame_number
 
 
         # Create a list of the new frames.
@@ -1094,18 +1099,15 @@ class HamamatsuDevice(object):
         # We allocate enough to buffer 2 seconds of data or the specified 
         # number of frames for a fixed length acquisition
         #
-#         if self.acquisition_mode is "run_till_abort":
+        if self.acquisition_mode is "run_till_abort":
             #n_buffers = int(20.0*self.getPropertyValue("internal_frame_rate")[0])
-            #n_buffers = 1
+            n_buffers = self.number_frames*3 #3 is an experimental value that doesn't allow a buffer overrun. The save time gets higher faster than taking frames from the camera buffer
         
         
-#         elif self.acquisition_mode is "fixed_length":
-#             n_buffers = self.number_frames
-#         
-#         elif self.acquisition_mode is "Threshold_h5":
-#             n_buffers = 400 #just a number for trying the program
+        elif self.acquisition_mode is "fixed_length":
+            n_buffers = self.number_frames
 
-        n_buffers = self.number_frames
+        #n_buffers = self.number_frames #n_buffers is initialized to the selected number of frames 
         self.number_image_buffers = n_buffers
 
         self.checkStatus(dcam.dcambuf_alloc(self.camera_handle,
@@ -1312,7 +1314,7 @@ class HamamatsuDeviceMR(HamamatsuDevice):
             
             n_buffers = 1
             self.number_image_buffers = n_buffers
-            ptr_array = ctypes.c_void_p * self.number_image_buffers #crea un array del tipo c_void_p
+            ptr_array = ctypes.c_void_p * self.number_image_buffers #creates a type c_void_p array
             self.hcam_ptr = ptr_array() 
             self.hcam_data = []
             hc_data = HCamData(self.frame_bytes)

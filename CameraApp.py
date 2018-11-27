@@ -5,15 +5,21 @@
 """
 
 from ScopeFoundry import BaseMicroscopeApp
+import os
 
 class HamamatsuApp(BaseMicroscopeApp):
     
     name = 'HamamatsuApp'
     
-    def __init__(self, *kwds):
-        
-        super().__init__(*kwds)
+    def __init__(self, *kwds): 
+        """
+        We need an __init__ since we want to put a new save directory 
+        """
+        super().__init__(*kwds) # *kwds is needed since in the main we pass as argument sys.argv, and without
+                                # the *kwds this will give a problem
         self.settings['save_dir'] = "D:\Data"
+        self.settings.save_dir.hardware_set_func = self.setDirFunc #calls set dir func when the save_dir widget is changed
+        
     
     def setup(self):
         
@@ -29,7 +35,15 @@ class HamamatsuApp(BaseMicroscopeApp):
         
         self.ui.show()
         self.ui.activateWindow()
-
+    
+    def setDirFunc(self, val = None):
+        """
+        Gets called everytime we modify the directory.
+        If it does not exist, we create a new one
+        """
+        
+        if not os.path.isdir(self.settings['save_dir']):
+            os.makedirs(self.settings['save_dir'])
 
 if __name__ == '__main__':
     

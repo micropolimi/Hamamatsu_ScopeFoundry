@@ -26,7 +26,7 @@ class HamamatsuHardware(HardwareComponent):
                                                        vmin = 0)
         
         self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, ro = 0, 
-                                                         choices = ["fixed_length", "run_till_abort", "Threshold_h5"], initial = "fixed_length")
+                                                         choices = ["fixed_length", "run_till_abort"], initial = "fixed_length")
         
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, 
                                                       initial = 1, vmin = 1)
