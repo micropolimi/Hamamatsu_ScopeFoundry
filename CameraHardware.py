@@ -6,7 +6,7 @@
 
 from ScopeFoundry import HardwareComponent
 import CameraDevice
-from CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, dcam, DCAMERR_NOERROR, DCAMException
+from CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, dcam, DCAMERR_NOERROR, DCAMException 
 
 
 class HamamatsuHardware(HardwareComponent):
@@ -25,11 +25,14 @@ class HamamatsuHardware(HardwareComponent):
                                                        spinbox_step = 0.01, spinbox_decimals = 6, unit = 'sec', initial = 0.01, reread_from_hardware_after_write = True,
                                                        vmin = 0)
         
+        self.internal_frame_rate = self.add_logged_quantity('internal_frame_rate', dtype = float, si = False, ro = 1,
+                                                            initial = 0, unit = 'fps')
+        
         self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, ro = 0, 
                                                          choices = ["fixed_length", "run_till_abort"], initial = "fixed_length")
         
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, 
-                                                      initial = 1, vmin = 1)
+                                                      initial = 200, vmin = 1)
         
         #For subarray we have imposed float, since otherwise I cannot modify the step (I should modify the logged quantities script, but I prefer left it untouched)
         self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=float, si = False, ro= 0,
@@ -49,6 +52,12 @@ class HamamatsuHardware(HardwareComponent):
                                                       spinbox_step = 4, spinbox_decimals = 0, initial = 0, vmin = 0, vmax = 2044, reread_from_hardware_after_write = True,
                                                       description = "The default value 0 corresponds to the first pixel starting from the top")
         
+        self.optimal_offset = self.add_logged_quantity('optimal_offset', dtype = bool, si = False, ro = 0, 
+                                                       initial = True)
+        
+        self.binning = self.add_logged_quantity('binning', dtype = int, ro = 0,
+                                                choices = [1, 2, 4], initial = 1, reread_from_hardware_after_write = True )
+        
         self.trsource = self.add_logged_quantity('trigger_source', dtype=str, si=False, ro=0, 
                                                  choices = ["internal", "external"], initial = 'internal', reread_from_hardware_after_write = True)
         
@@ -57,13 +66,6 @@ class HamamatsuHardware(HardwareComponent):
         
         self.trpolarity = self.add_logged_quantity('trigger_polarity', dtype=str, si=False, ro=0, 
                                                    choices = ["positive", "negative"], initial = 'positive', reread_from_hardware_after_write = True)
-        
-        self.internal_frame_rate = self.add_logged_quantity('internal_frame_rate', dtype = float, si = False, ro = 1,
-                                                            initial = 0, unit = 'fps')
-        
-        self.optimal_offset = self.add_logged_quantity('optimal_offset', dtype = bool, si = False, ro = 0, 
-                                                       initial = True)
-        
         
 #         self.preset_sizes = self.add_logged_quantity('preset_sizes', dtype=str, si=False, ro = 0, 
 #                                                      choices = ["2048x2048",
@@ -105,7 +107,8 @@ class HamamatsuHardware(HardwareComponent):
                                            number_frames=self.number_frames.val, exposure=self.exposure_time.val, 
                                            trsource=self.trsource.val, trmode=self.trmode.val, trpolarity=self.trpolarity.val,
                                            subarrayh_pos=self.subarrayh_pos.val, subarrayv_pos = self.subarrayv_pos.val,
-                                           hardware = self) #maybe with more cameras we have to change  
+                                           binning = self.binning.val, hardware = self) #maybe with more cameras we have to change
+        
         self.readOnlyWhenOpt()
         self.camera.hardware_read_func = self.hamamatsu.getModelInfo
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
@@ -119,6 +122,7 @@ class HamamatsuHardware(HardwareComponent):
         self.subarrayh_pos.hardware_read_func = self.hamamatsu.getSubarrayHpos
         self.subarrayv_pos.hardware_read_func = self.hamamatsu.getSubarrayVpos
         self.internal_frame_rate.hardware_read_func = self.hamamatsu.getInternalFrameRate
+        self.binning.hardware_read_func = self.hamamatsu.getBinning
         
         self.subarrayh.hardware_set_func = self.hamamatsu.setSubarrayH
         self.subarrayv.hardware_set_func = self.hamamatsu.setSubarrayV
@@ -130,6 +134,7 @@ class HamamatsuHardware(HardwareComponent):
         self.trsource.hardware_set_func = self.hamamatsu.setTriggerSource
         self.trmode.hardware_set_func = self.hamamatsu.setTriggerMode
         self.trpolarity.hardware_set_func = self.hamamatsu.setTriggerPolarity
+        self.binning.hardware_set_func = self.hamamatsu.setBinning
         
         self.optimal_offset.hardware_set_func = self.readOnlyWhenOpt
         

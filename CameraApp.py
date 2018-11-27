@@ -17,7 +17,7 @@ class HamamatsuApp(BaseMicroscopeApp):
         """
         super().__init__(*kwds) # *kwds is needed since in the main we pass as argument sys.argv, and without
                                 # the *kwds this will give a problem
-        self.settings['save_dir'] = "D:\Data"
+        self.settings['save_dir'] = "D:\\Data\\temp"
         self.settings.save_dir.hardware_set_func = self.setDirFunc #calls set dir func when the save_dir widget is changed
         
     

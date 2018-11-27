@@ -83,8 +83,11 @@ class HamamatsuMeasurement(Measurement):
             
     def run(self):
         
-        self.image = np.empty([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)],dtype=np.uint16)
-        self.image[0,0]=1 #Otherwise we get the "all zero pixels" error (we should modify pyqtgraph, but I dont want to...
+        self.eff_subarrayh = int(self.camera.subarrayh.val/self.camera.binning.val)
+        self.eff_subarrayv = int(self.camera.subarrayv.val/self.camera.binning.val)
+        
+        self.image = np.zeros([self.eff_subarrayh,self.eff_subarrayv],dtype=np.uint16)
+        self.image[0,0] = 1 #Otherwise we get the "all zero pixels" error (we should modify pyqtgraph, but I dont want to...
         #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
             
@@ -110,7 +113,7 @@ class HamamatsuMeasurement(Measurement):
                     for aframe in frames:
                         
                         self.np_data = aframe.getData()  
-                        self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T # T is faster. Why?
+                        self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh)).T # T is faster. Why?
                         if self.settings['save_h5']:
                             self.image_h5[index,:,:] = self.image # saving to the h5 dataset
                             self.h5file.flush() # maybe is not necessary
@@ -128,54 +131,91 @@ class HamamatsuMeasurement(Measurement):
                     
             elif self.camera.acquisition_mode.val == "run_till_abort":
                 
-                save = 0
+                save = True
                 
                 while not self.interrupt_measurement_called:
                     
-                    [frame, dims] = self.camera.hamamatsu.getNewestFrame()        
+                    [frame, dims] = self.camera.hamamatsu.getLastFrame()        
                     self.np_data = frame.getData()
-                    self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-                    total = np.sum(self.np_data, dtype = np.uint64)
+                    self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh)).T
+                    #total = np.sum(self.np_data, dtype = np.uint64)
+                    
                     if self.settings['save_h5']:
                         
-                        if save == 0:
+                        if save:
                             self.initH5()
-                            save = 1 #at next cycle, we don't do initH5 again (we have already created the file)
+                            save = False #at next cycle, we don't do initH5 again (we have already created the file)
                         
-                        total = np.sum(self.np_data, dtype = np.uint64) # total goes in overflow if is of the same type (uint16) of the image pixels
-                        
-                        newest_frame_index = self.camera.hamamatsu.buffer_index
-                        print(self.camera.hamamatsu.last_frame_number)
-                        if total > self.settings['threshold']*self.camera.hamamatsu.frame_x*self.camera.hamamatsu.frame_y:
+                        total = np.mean(self.np_data, dtype = np.uint64) 
+                        last_frame_index = self.camera.hamamatsu.buffer_index
+                        #print(self.camera.hamamatsu.last_frame_number)
+                        print(total)
+#===============================================================================
+#                         if total > self.settings['threshold']:
+#                             print("\n \n ******* \n \n Saving :D !\n \n *******")
+#                             j = 0
+#                             
+#                             #while(len(frames)) < self.camera.number_frames.val: #we want 200 frames
+#                             while j < self.camera.number_frames.val: 
+#                                 upgraded_last_frame_index, upgraded_frame_number = self.camera.hamamatsu.getTransferInfo() #we upgrade the transfer information
+#                                 
+#                                 if last_frame_index < upgraded_last_frame_index: #acquisition has not reached yet the end of the buffer    
+#                                     j = self.getThresholdH5(last_frame_index,  upgraded_last_frame_index + 1, j)
+# #                                     for i in range(last_frame_index, upgraded_last_frame_index + 1):
+# #                                         
+# #                                         if j < self.camera.number_frames.val:
+# #                                             frame = self.camera.hamamatsu.getRequiredFrame(i)[0]
+# #                                             self.np_data = frame.getData() #-1 takes the last element
+# #                                             self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+# #                                             self.image_h5[j,:,:] = self.image # saving to the h5 dataset
+# #                                             j+=1
+# #                                             self.settings['progress'] = j*100./self.camera.hamamatsu.number_image_buffers
+#                                 
+#                                 else: #acquisition has reached the end of the buffer
+#                                     j = self.getThresholdH5(last_frame_index+1, 3*self.camera.hamamatsu.number_image_buffers + 1, j)
+#                                     j = self.getThresholdH5(0, upgraded_last_frame_index, j)
+#                                 
+#                                 last_frame_index = upgraded_last_frame_index
+#                                 
+#                                 
+#                                 
+#                                 
+#                             self.interrupt()
+#                             print(self.camera.hamamatsu.last_frame_number)
+#===============================================================================
+                     
+                        if total > self.settings['threshold']:
                             print("\n \n ******* \n \n Saving :D !\n \n *******")
                             j = 0
-                            
+                            #starting_index=last_frame_index
+                            stalking_number = 0
+                            remaining = False
                             #while(len(frames)) < self.camera.number_frames.val: #we want 200 frames
                             while j < self.camera.number_frames.val: 
-                                upgraded_newest_frame_index, upgraded_frame_number = self.camera.hamamatsu.getTransferInfo() #we upgrade the transfer information
                                 
-                                if newest_frame_index < upgraded_newest_frame_index: #acquisition has not reached yet the end of the buffer    
-                                    j = self.getThresholdH5(newest_frame_index,  upgraded_newest_frame_index + 1, j)
-#                                     for i in range(newest_frame_index, upgraded_newest_frame_index + 1):
-#                                         
-#                                         if j < self.camera.number_frames.val:
-#                                             frame = self.camera.hamamatsu.getRequiredFrame(i)[0]
-#                                             self.np_data = frame.getData() #-1 takes the last element
-#                                             self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
-#                                             self.image_h5[j,:,:] = self.image # saving to the h5 dataset
-#                                             j+=1
-#                                             self.settings['progress'] = j*100./self.camera.hamamatsu.number_image_buffers
+                                self.get_and_save_Frame(j,last_frame_index)
                                 
-                                else: #acquisition has reached the end of the buffer
-                                    j = self.getThresholdH5(newest_frame_index, self.camera.hamamatsu.number_image_buffers + 1, j)
-
-                                    j = self.getThresholdH5(0, upgraded_newest_frame_index, j)
+                                self.updateIndex(last_frame_index)
                                 
-                                newest_frame_index = upgraded_newest_frame_index
+                                j+=1
                                 
+                                if not remaining:
+                                    
+                                    upgraded_last_frame_index = self.camera.hamamatsu.getTransferInfo()[0] #we upgrade the transfer information
+                                    
+                                    print('upgraded_last_frame_index:' , upgraded_last_frame_index)
+                                    
+                                    stalking_number = stalking_number + self.camera.hamamatsu.backlog - 1
+                                    
+                                    print('stalking_number' , stalking_number)
+                                    
+                                    if stalking_number > self.camera.hamamatsu.number_image_buffers:
+                                        self.camera.hamamatsu.stopAcquisitionNotReleasing()
+                                        remaining = True
+                                   
                             self.interrupt()
                             print(self.camera.hamamatsu.last_frame_number)
-                    
+                         
         finally:
             
             self.camera.hamamatsu.stopAcquisition()
@@ -196,6 +236,9 @@ class HamamatsuMeasurement(Measurement):
         self.threshold = threshold
         
     def initH5(self):
+        """
+        Make the initialization operations for the h5 file.
+        """
         
         self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
         self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
@@ -216,13 +259,54 @@ class HamamatsuMeasurement(Measurement):
         self.image_h5.attrs['element_size_um'] =  [1,1,1]
         
     def getThresholdH5(self, start, end, j):
+        """
+        Get the data at the i-th frame (from start to end-1), and 
+        save the reshaped data into an h5 file.
+        
+        j is a variable that gets updated every time. It represents
+        the number of saved images. If this number gets bigger than
+        the wanted number of frames, the below operation is not
+        executed (we dont want to save other frames).
+        
+        Upload the progress bar.
+        """
         for i in range(start, end):
             #put elements in new_frames until the end of buffer
             if j < self.camera.number_frames.val:
                 frame = self.camera.hamamatsu.getRequiredFrame(i)[0]
                 self.np_data = frame.getData()
-                self.image = np.reshape(self.np_data,(int(self.camera.subarrayv.val), int(self.camera.subarrayh.val))).T
+                self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh)).T
                 self.image_h5[j,:,:] = self.image # saving to the h5 dataset
                 j+=1
                 self.settings['progress'] = j*100./self.camera.hamamatsu.number_image_buffers
+                
         return j
+    
+    def get_and_save_Frame(self, frameindex, lastframeindex):
+        """
+        Get the data at the i-th frame (from start to end-1), and 
+        save the reshaped data into an h5 file.
+        
+        j is a variable that gets updated every time. It represents
+        the number of saved images. If this number gets bigger than
+        the wanted number of frames, the below operation is not
+        executed (we dont want to save other frames).
+        
+        Upload the progress bar.
+        """
+        
+        #put elements in new_frames until the end of buffer
+           
+        frame = self.camera.hamamatsu.getRequiredFrame(lastframeindex)[0]
+        self.np_data = frame.getData()
+        self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh)).T
+        self.image_h5[frameindex,:,:] = self.image # saving to the h5 dataset
+        self.settings['progress'] = frameindex*100./self.camera.hamamatsu.number_image_buffers
+    
+    def updateIndex(self, last_frame_index):
+        
+        last_frame_index+=1
+        
+        if last_frame_index > self.camera.hamamatsu.number_image_buffers - 1:
+            last_frame_index = 0
+        
