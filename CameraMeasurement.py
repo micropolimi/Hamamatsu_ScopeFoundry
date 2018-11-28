@@ -60,7 +60,7 @@ class HamamatsuMeasurement(Measurement):
         self.ui.plot_groupBox.layout().addWidget(self.imv)
         
         # Image initialization
-        self.image = np.zeros([int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)],dtype=np.uint16)
+        self.image = np.zeros((int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)),dtype=np.uint16)
         
         # Create PlotItem object (a set of axes)  
         
@@ -86,7 +86,7 @@ class HamamatsuMeasurement(Measurement):
         self.eff_subarrayh = int(self.camera.subarrayh.val/self.camera.binning.val)
         self.eff_subarrayv = int(self.camera.subarrayv.val/self.camera.binning.val)
         
-        self.image = np.zeros([self.eff_subarrayh,self.eff_subarrayv],dtype=np.uint16)
+        self.image = np.zeros((self.eff_subarrayh,self.eff_subarrayv),dtype=np.uint16)
         self.image[0,0] = 1 #Otherwise we get the "all zero pixels" error (we should modify pyqtgraph, but I dont want to...
         #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
         try:
@@ -146,7 +146,7 @@ class HamamatsuMeasurement(Measurement):
                             self.initH5()
                             save = False #at next cycle, we don't do initH5 again (we have already created the file)
                         
-                        total = np.mean(self.np_data, dtype = np.uint64) 
+                        total = np.mean(self.np_data, dtype = np.uint64)
                         last_frame_index = self.camera.hamamatsu.buffer_index
                         #print(self.camera.hamamatsu.last_frame_number)
                         print(total)
@@ -185,6 +185,7 @@ class HamamatsuMeasurement(Measurement):
 #===============================================================================
                      
                         if total > self.settings['threshold']:
+                            
                             print("\n \n ******* \n \n Saving :D !\n \n *******")
                             j = 0
                             #starting_index=last_frame_index
@@ -195,25 +196,28 @@ class HamamatsuMeasurement(Measurement):
                                 
                                 self.get_and_save_Frame(j,last_frame_index)
                                 
-                                self.updateIndex(last_frame_index)
-                                
+                                last_frame_index = self.updateIndex(last_frame_index)
+                                print(last_frame_index)
                                 j+=1
                                 
                                 if not remaining:
                                     
                                     upgraded_last_frame_index = self.camera.hamamatsu.getTransferInfo()[0] #we upgrade the transfer information
                                     
-                                    print('upgraded_last_frame_index:' , upgraded_last_frame_index)
+                                    print('upgraded_last_frame_index: ' , upgraded_last_frame_index)
                                     
                                     stalking_number = stalking_number + self.camera.hamamatsu.backlog - 1
                                     
-                                    print('stalking_number' , stalking_number)
+                                    print('stalking_number: ' , stalking_number)
                                     
-                                    if stalking_number > self.camera.hamamatsu.number_image_buffers:
-                                        self.camera.hamamatsu.stopAcquisitionNotReleasing()
+                                    print('The camera is at {} passes from you'.format(self.camera.hamamatsu.number_image_buffers - stalking_number))
+                                    
+                                    if stalking_number + self.camera.hamamatsu.backlog > self.camera.hamamatsu.number_image_buffers: 
+                                        self.camera.hamamatsu.stopAcquisitionNotReleasing() #stop acquisition when we know that at next iteration, some images may be rewritten
                                         remaining = True
                                    
                             self.interrupt()
+                            self.camera.hamamatsu.releaseBuffer()
                             print(self.camera.hamamatsu.last_frame_number)
                          
         finally:
@@ -282,15 +286,13 @@ class HamamatsuMeasurement(Measurement):
                 
         return j
     
-    def get_and_save_Frame(self, frameindex, lastframeindex):
+    def get_and_save_Frame(self, saveindex, lastframeindex):
         """
-        Get the data at the i-th frame (from start to end-1), and 
+        Get the data of the lastframeindex, and 
         save the reshaped data into an h5 file.
         
-        j is a variable that gets updated every time. It represents
-        the number of saved images. If this number gets bigger than
-        the wanted number of frames, the below operation is not
-        executed (we dont want to save other frames).
+        saveindex is an index representing the position of the saved image
+        in the h5 file. 
         
         Upload the progress bar.
         """
@@ -300,8 +302,8 @@ class HamamatsuMeasurement(Measurement):
         frame = self.camera.hamamatsu.getRequiredFrame(lastframeindex)[0]
         self.np_data = frame.getData()
         self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh)).T
-        self.image_h5[frameindex,:,:] = self.image # saving to the h5 dataset
-        self.settings['progress'] = frameindex*100./self.camera.hamamatsu.number_image_buffers
+        self.image_h5[saveindex,:,:] = self.image # saving to the h5 dataset
+        self.settings['progress'] = saveindex*100./self.camera.hamamatsu.number_image_buffers
     
     def updateIndex(self, last_frame_index):
         
@@ -310,3 +312,4 @@ class HamamatsuMeasurement(Measurement):
         if last_frame_index > self.camera.hamamatsu.number_image_buffers - 1:
             last_frame_index = 0
         
+        return last_frame_index
