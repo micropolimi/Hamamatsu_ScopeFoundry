@@ -1,0 +1,15 @@
+2018-11-28T15:56:38|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 146, in run
+    self.initH5()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 253, in initH5
+    dtype = self.image.dtype, chunks = (1,2048,2048)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\h5py\_hl\group.py", line 116, in create_dataset
+    dsid = dataset.make_new_dset(self, shape, dtype, data, **kwds)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\h5py\_hl\dataset.py", line 86, in make_new_dset
+    raise ValueError(errmsg)
+ValueError: Chunk shape must not be greater than data shape in any dimension. (1, 2048, 2048) is not compatible with (200, 512, 512)
+

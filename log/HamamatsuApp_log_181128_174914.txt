@@ -1,0 +1,9 @@
+2018-11-28T17:49:25|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 140, in run
+    self.image = np.reshape((self.eff_subarrayv, self.eff_subarrayh), self.npdata)
+AttributeError: 'HamamatsuMeasurement' object has no attribute 'npdata'
+
