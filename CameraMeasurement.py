@@ -1,6 +1,6 @@
-""" Written by Michele Castriotta, Alessandro Zecchi, Andrea Bassi (Polimi).
+""" 
+   Written by Michele Castriotta, Alessandro Zecchi, Andrea Bassi (Polimi).
    Code for creating the measurement class of ScopeFoundry for the Orca Flash 4V3
-   
    11/18
 """
 
@@ -9,28 +9,29 @@ from ScopeFoundry.helper_funcs import sibling_path, load_qt_ui_file
 from ScopeFoundry import h5_io
 import pyqtgraph as pg
 import numpy as np
-#import time
 
-
+    
 class HamamatsuMeasurement(Measurement):
     
     name = "hamamatsu_image"
-    
+        
     def setup(self):
         "..."
 
         self.ui_filename = sibling_path(__file__, "form.ui")
     
         self.ui = load_qt_ui_file(self.ui_filename)
-        
-        self.settings.New('save_h5', dtype=bool, initial=False)
-        self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.02)
+        self.settings.New('record', dtype=bool, initial=False, hardware_set_func=self.setRecord, hardware_read_func=self.getRecord, reread_from_hardware_after_write=True)
+        self.settings.New('save_h5', dtype=bool, initial=False, hardware_set_func=self.setSaveH5, hardware_read_func=self.getSaveH5, reread_from_hardware_after_write=True)
+        self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.02 , hardware_set_func=self.setRefresh)
+        self.settings.New('autoscale', dtype=bool, initial=True, hardware_set_func=self.setautoScale)
         self.settings.New('autoLevels', dtype=bool, initial=True, hardware_set_func=self.setautoLevels)
         self.settings.New('level_min', dtype=int, initial=60, hardware_set_func=self.setminLevel)
         self.settings.New('level_max', dtype=int, initial=150, hardware_set_func=self.setmaxLevel)
         self.settings.New('threshold', dtype=int, initial=500, hardware_set_func=self.setThreshold)
         self.camera = self.app.hardware['HamamatsuHardware']
         
+        self.autoscale = self.settings.autoscale.val
         self.display_update_period = self.settings.refresh_period.val
         self.autoLevels = self.settings.autoLevels.val
         self.level_min = self.settings.level_min.val
@@ -60,26 +61,24 @@ class HamamatsuMeasurement(Measurement):
         self.ui.plot_groupBox.layout().addWidget(self.imv)
         
         # Image initialization
-        self.image = np.zeros((int(self.camera.subarrayh.val),int(self.camera.subarrayv.val)),dtype=np.uint16)
+        self.image = np.zeros((int(self.camera.subarrayv.val),int(self.camera.subarrayh.val)),dtype=np.uint16)
         
         # Create PlotItem object (a set of axes)  
         
     def update_display(self):
         """
-        Displays (plots) the numpy array self.buffer. 
-        This function runs repeatedly and automatically during the measurement run.
-        its update frequency is defined by self.display_update_period
+        Displays the numpy array called self.image.  
+        This function runs repeatedly and automatically during the measurement run,
+        its update frequency is defined by self.display_update_period.
         """
         #self.optimize_plot_line.setData(self.buffer) 
 
         #self.imv.setImage(np.reshape(self.np_data,(self.camera.subarrayh.val, self.camera.subarrayv.val)).T)
         #self.imv.setImage(self.image, autoLevels=False, levels=(100,340))
-        
-        #levels should not be sent when autoLevels is True, otherwise the image is displayed with them
-        if self.autoLevels == False:
-            self.imv.setImage((self.image).T, autoLevels=self.autoLevels, levels=(self.level_min, self.level_max))
-        else:
-            self.imv.setImage((self.image).T, autoLevels=self.autoLevels)
+        if self.autoLevels == False:  
+            self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoscale.val, levels=(self.level_min, self.level_max))
+        else: #levels should not be sent when autoLevels is True, otherwise the image is displayed with them
+            self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoscale.val)
             
     def run(self):
         
@@ -87,11 +86,11 @@ class HamamatsuMeasurement(Measurement):
         self.eff_subarrayv = int(self.camera.subarrayv.val/self.camera.binning.val)
         
         self.image = np.zeros((self.eff_subarrayv,self.eff_subarrayh),dtype=np.uint16)
-        self.image[0,0] = 1 #Otherwise we get the "all zero pixels" error (we should modify pyqtgraph, but I dont want to...
-        #print(self.camera.hamamatsu.getPropertyValue("internal_frame_rate"))
+        self.image[0,0] = 1 #Otherwise we get the "all zero pixels" error (we should modify pyqtgraph...)
         try:
             
             self.camera.read_from_hardware()
+
             self.camera.hamamatsu.startAcquisition()
             
             index = 0
@@ -102,7 +101,6 @@ class HamamatsuMeasurement(Measurement):
                     self.initH5()
                     print("\n \n ******* \n \n Saving :D !\n \n *******")
                     
-                #for i in range(self.camera.hamamatsu.number_image_buffers):
                 while index < self.camera.hamamatsu.number_image_buffers:
         
                     # Get frames.
@@ -126,7 +124,7 @@ class HamamatsuMeasurement(Measurement):
                     if self.interrupt_measurement_called:
                         break    
                     #index = index + len(frames)
-                        #np_data.tofile(bin_fp)
+                    #np_data.tofile(bin_fp)
                     self.settings['progress'] = index*100./self.camera.hamamatsu.number_image_buffers
                     
             elif self.camera.acquisition_mode.val == "run_till_abort":
@@ -138,6 +136,12 @@ class HamamatsuMeasurement(Measurement):
                     [frame, dims] = self.camera.hamamatsu.getLastFrame()        
                     self.np_data = frame.getData()
                     self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh))
+                    
+                    if self.settings['record']:
+                        self.camera.hamamatsu.stopAcquisition()
+                        self.camera.hamamatsu.startRecording()
+                        self.camera.hamamatsu.stopRecording()
+                        self.interrupt()    
                                         
                     if self.settings['save_h5']:
                         
@@ -190,7 +194,6 @@ class HamamatsuMeasurement(Measurement):
                             #starting_index=last_frame_index
                             stalking_number = 0
                             remaining = False
-                            #while(len(frames)) < self.camera.number_frames.val: #we want 200 frames
                             while j < self.camera.number_frames.val: 
                                 
                                 self.get_and_save_Frame(j,last_frame_index)
@@ -201,7 +204,7 @@ class HamamatsuMeasurement(Measurement):
                                 
                                 if not remaining:
                                     
-                                    upgraded_last_frame_index = self.camera.hamamatsu.getTransferInfo()[0] #we upgrade the transfer information
+                                    upgraded_last_frame_index = self.camera.hamamatsu.getTransferInfo()[0] # upgrades the transfer information
                                     
                                     print('upgraded_last_frame_index: ' , upgraded_last_frame_index)
                                     
@@ -222,9 +225,15 @@ class HamamatsuMeasurement(Measurement):
         finally:
             
             self.camera.hamamatsu.stopAcquisition()
-            
+
             if self.settings['save_h5']:
-                self.h5file.close() # close connection     
+                self.h5file.close() # close h5 file  
+                  
+    def setRefresh(self, refresh_period):  
+        self.display_update_period = refresh_period
+    
+    def setautoScale(self, autoscale):
+        self.autoscale = autoscale
 
     def setautoLevels(self, autoLevels):
         self.autoLevels = autoLevels
@@ -237,10 +246,28 @@ class HamamatsuMeasurement(Measurement):
         
     def setThreshold(self, threshold):
         self.threshold = threshold
+    
+    def setSaveH5(self, save_h5):
+        self.settings.save_h5 = save_h5
         
+    def getSaveH5(self):
+        if self.settings['record']:
+            self.settings.save_h5 = False
+        return self.settings.save_h5 
+        
+    def setRecord(self, record):
+        self.settings.record = record
+    
+        
+    def getRecord(self):
+        if self.settings['save_h5']:
+            self.settings.record = False
+        return self.settings.record 
+    
+            
     def initH5(self):
         """
-        Make the initialization operations for the h5 file.
+        Initialization operations for the h5 file.
         """
         
         self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
@@ -254,7 +281,7 @@ class HamamatsuMeasurement(Measurement):
         """
         THESE NAMES MUST BE CHANGED
         """
-        self.image_h5.dims[0].label = 'z'
+        self.image_h5.dims[0].label = "z"
         self.image_h5.dims[1].label = "y"
         self.image_h5.dims[2].label = "x"
         
@@ -289,21 +316,18 @@ class HamamatsuMeasurement(Measurement):
     
     def get_and_save_Frame(self, saveindex, lastframeindex):
         """
-        Get the data of the lastframeindex, and 
+        Get the data at the lastframeindex, and 
         save the reshaped data into an h5 file.
-        
         saveindex is an index representing the position of the saved image
         in the h5 file. 
-        
-        Upload the progress bar.
+        Update the progress bar.
         """
-        
-        #put elements in new_frames until the end of buffer
            
         frame = self.camera.hamamatsu.getRequiredFrame(lastframeindex)[0]
         self.np_data = frame.getData()
         self.image = np.reshape(self.np_data,(self.eff_subarrayv, self.eff_subarrayh))
         self.image_h5[saveindex,:,:] = self.image # saving to the h5 dataset
+        self.h5file.flush() # maybe is not necessary
         self.settings['progress'] = saveindex*100./self.camera.hamamatsu.number_image_buffers
     
     def updateIndex(self, last_frame_index):

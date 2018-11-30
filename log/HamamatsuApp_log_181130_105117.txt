@@ -1,0 +1,18 @@
+2018-11-30T10:51:24|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 329, in setRecord
+    self.settings.save_h5.change_readonly1(True)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 23, in change_readonly1
+    widget.setReadOnly(self.ro)
+AttributeError: 'QCheckBox' object has no attribute 'setReadOnly'
+
+2018-11-30T10:51:25|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 324, in setSaveH5
+    self.settings.record.change_readonly1(True)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 23, in change_readonly1
+    widget.setReadOnly(self.ro)
+AttributeError: 'QCheckBox' object has no attribute 'setReadOnly'
+

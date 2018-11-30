@@ -15,7 +15,7 @@ class HamamatsuApp(BaseMicroscopeApp):
         """
         We need an __init__ since we want to put a new save directory 
         """
-        super().__init__(*kwds) # *kwds is needed since in the main we pass as argument sys.argv, and without
+        super().__init__(*kwds) # *kwds is needed since in the main we pass as argument sys.argv. Without
                                 # the *kwds this will give a problem
         self.settings['save_dir'] = "D:\\Data\\temp"
         self.settings.save_dir.hardware_set_func = self.setDirFunc #calls set dir func when the save_dir widget is changed
@@ -46,8 +46,8 @@ class HamamatsuApp(BaseMicroscopeApp):
             os.makedirs(self.settings['save_dir'])
 
 if __name__ == '__main__':
-    
+            
     import sys
     app = HamamatsuApp(sys.argv)
     sys.exit(app.exec_())
-    
+        

@@ -242,6 +242,18 @@ class DCAMREC_OPEN(ctypes.Structure):
                 ("usertextsize_session", ctypes.c_double),
                 ("usertextsize_file", ctypes.c_double)]
     
+
+class DCAMREC_STATUS(ctypes.Structure):
+    _fields_ = [("size", ctypes.c_int32),
+                ("currentsession_index", ctypes.c_int32),
+                ("maxframecount_per_session", ctypes.c_int32),
+                ("currentframe_index", ctypes.c_int32),
+                ("missingframe_count", ctypes.c_int32),
+                ("flags", ctypes.c_int32),
+                ("totalframecount", ctypes.c_int32),
+                ("reserved", ctypes.c_int32)]
+
+    
 ## DCAMPROP_VALUETEXT
 #
 # The dcam text property structure.
@@ -279,11 +291,14 @@ class HCamData(object):
         Create a data object of the appropriate size.
         """
         super().__init__(**kwds)
-        self.np_array = np.ascontiguousarray(np.empty(int(size/2), dtype=np.uint16)) #self.np_array is a contiguous array in memory, that has size/2 elements of uint16 type I think...)
-        self.size = size                                                                      #It's size over two since we input the number of bytes of a frame, and we reserve space for uint16 variabl (bytes are 8 bit, their ratio is 2
+        self.np_array = np.ascontiguousarray(np.empty(int(size/2), dtype=np.uint16)) 
+        #self.np_array is a contiguous array in memory, that has size/2 elements of uint16 type I think...)
+        #It's size over two since we input the number of bytes of a frame, and we reserve space for uint16 variable (bytes are 8 bit, their ratio is 2)
 
-    def __getitem__(self, slice):
-        return self.np_array[slice]
+        self.size = size                                                            
+
+    def __getitem__(self, slicing):
+        return self.np_array[slicing]
 
     def copyData(self, address):
         """
@@ -361,16 +376,19 @@ class HamamatsuDevice(object):
         self.max_height = self.getPropertyValue("image_height")[0]
         
         # Here we set the values in order to change these properties before the connection
-        self.setExposure(exposure)
-        self.setSubarrayH(frame_x)
-        self.setSubarrayV(frame_y)
-        self.setSubArrayMode()
-        self.setTriggerSource(trsource)
-        self.setTriggerMode(trmode)
-        self.setTriggerPolarity(trpolarity)
-        self.setSubarrayHpos(subarrayh_pos)
-        self.setSubarrayVpos(subarrayv_pos)
-        self.setBinning(binning)
+        
+        if __name__ != "__main__":
+            
+            self.setExposure(exposure)
+            self.setSubarrayH(frame_x)
+            self.setSubarrayV(frame_y)
+            self.setSubArrayMode()
+            self.setTriggerSource(trsource)
+            self.setTriggerMode(trmode)
+            self.setTriggerPolarity(trpolarity)
+            self.setSubarrayHpos(subarrayh_pos)
+            self.setSubarrayVpos(subarrayv_pos)
+            self.setBinning(binning)
 
 
     def captureSetup(self):
@@ -629,9 +647,17 @@ class HamamatsuDevice(object):
             prop_attr = self.getPropertyValue(i)
             print("{} : {}".format(i, prop_attr[0]))
     
-    def getTemperature(self):
+    def getTemperature(self): 
+        '''
+        If the camera model has the temperature property value, returns the value as a string.
+        Otherwise (like  with the model C11440-22CU) returns the status of the cooler.
+        '''
         
-        return self.getPropertyValue("sensor_temperature")[0]       
+        if self.camera_model ==  "C11440-22CU":
+            T = self.getPropertyValue("sensor_cooler_status")[0] 
+        else:
+            T = self.getPropertyValue("sensor_temperature")[0] 
+        return str(T)  
     
     def isCameraProperty(self, property_name):
         """
@@ -685,10 +711,11 @@ class HamamatsuDevice(object):
         if hpos % 4 != 0: #If the size is not a multiple of four, is not an allowed value
             hpos = hpos - hpos%4 #make the size a multiple of four
         
-        max = self.getPropertyRange("subarray_hpos")[1] #max value
-        #if vpos > 1020: #If we have 4 pixel of size, the algorithm for the optimal position fails, since the max value for the offset is 1020 (while with 4 pixels it tries to write 1022)
-        if hpos > max:
-            hpos = max
+        maximum = self.getPropertyRange("subarray_hpos")[1] #max value
+        #if vpos > 1020: #If we have 4 pixel of size, the algorithm for the optimal position fails,
+        # since the max value for the offset is 1020 (while with 4 pixels it tries to write 1022)
+        if hpos > maximum:
+            hpos = maximum
             
         self.setPropertyValue("subarray_hpos", hpos)
     
@@ -734,10 +761,11 @@ class HamamatsuDevice(object):
         if vpos % 4 != 0: #If the size is not a multiple of four, is not an allowed value
             vpos = vpos - vpos%4 #make the size a multiple of four
             
-        max = self.getPropertyRange("subarray_vpos")[1] #max value
-        #if vpos > 1020: #If we have 4 pixel of size, the algorithm for the optimal position fails, since the max value for the offset is 1020 (while with 4 pixels it tries to write 1022)
-        if vpos > max:
-            vpos = max
+        maximum = self.getPropertyRange("subarray_vpos")[1] #max value
+        # if vpos > 1020: #If we have 4 pixel of size, the algorithm for the optimal position fails,
+        # since the max value for the offset is 1020 (while with 4 pixels it tries to write 1022)
+        if vpos > maximum:
+            vpos = maximum
         
         self.setPropertyValue("subarray_vpos", vpos)
         
@@ -1108,20 +1136,18 @@ class HamamatsuDevice(object):
         """
         self.captureSetup()
 
-        #
         # Allocate Hamamatsu image buffers.
         # We allocate enough to buffer 2 seconds of data or the specified 
         # number of frames for a fixed length acquisition
-        #
+        
         if self.acquisition_mode is "run_till_abort":
             #n_buffers = int(20.0*self.getPropertyValue("internal_frame_rate")[0])
-            n_buffers = self.number_frames #3 is an experimental value that doesn't allow a buffer overrun. The save time gets higher faster than taking frames from the camera buffer
+            n_buffers = self.number_frames
         
         
         elif self.acquisition_mode is "fixed_length":
             n_buffers = self.number_frames
 
-        #n_buffers = self.number_frames #n_buffers is initialized to the selected number of frames 
         self.number_image_buffers = n_buffers
 
         self.checkStatus(dcam.dcambuf_alloc(self.camera_handle,
@@ -1186,6 +1212,103 @@ class HamamatsuDevice(object):
         """
         text_values = self.getPropertyText(property_name)
         return sorted(text_values, key = text_values.get)
+    
+    def startRecording(self):
+        '''
+        First attempts using record...
+        ''' 
+        # ACCESS IMAGE DATA
+        # During a recording session, the host software can access the frames that have already been recorded by using the dcamrec_lockframe() or dcamrec_copyframe() function.
+        # These functions will cause some stress to the computer so we do not recommend using them during a recording. 
+        self.captureSetup()
+        self.number_image_buffers = self.number_frames
+        
+        paramrec = DCAMREC_OPEN(0, 0, None, None, None, 0, 0, 0, 0, 0, 0, 0)
+        
+        paramrec.size = ctypes.sizeof(paramrec)
+        paramrec.path = ctypes.c_wchar_p( self.hardware.app.settings.save_dir.val + "\\" + str(time.strftime("%Y%m%d_%H%M%S_")) +  self.hardware.app.settings.sample.val )
+        paramrec.ext = ctypes.c_wchar_p("dcimg")
+        paramrec.maxframepersession = self.number_frames # number of frames acquired in 1 session?
+        #To use the disk recorder, the target file must be prepared first by calling the dcamrec_open() function.
+        #The HDCAM handle is not used with this function. To start recording, the dcamcap_record() function should be called during READY state.
+        # Finally, calling the dcamcap_start() function after dcamcap_record() starts the recording
+        self.checkStatus(dcam.dcamrec_openW(ctypes.byref(paramrec)), "dcamrec_openW")
+        self.rec_handle = ctypes.c_void_p(paramrec.hrec)
+         
+        self.checkStatus(dcam.dcambuf_alloc(self.camera_handle,
+                                  ctypes.c_int32(self.number_image_buffers)),
+                         "dcambuf_alloc")
+        
+        
+        self.checkStatus(dcam.dcamcap_record(self.camera_handle, 
+                                                   self.rec_handle), 
+                                                   "dcamcap_record")
+        
+        self.checkStatus(dcam.dcamcap_start(self.camera_handle,
+                                    DCAMCAP_START_SNAP),
+                                                  "dcamcap_start")
+        print(self.checkStatus(dcam.dcamrec_pause(self.rec_handle), ""))
+          
+        #=======================================================================
+        # paramrecstatus = DCAMREC_STATUS(0, 0, 0, 0, 0, 0, 0, 0)
+        # paramrecstatus.size = ctypes.sizeof(paramrecstatus)
+        # print(self.checkStatus(dcam.dcamrec_status(self.rec_handle, ctypes.byref(paramrec)), "dcamrec_status"))
+        #=======================================================================
+    def stopRecording(self):    
+              
+        captureStatus = ctypes.c_int32(0)
+        self.checkStatus(dcam.dcamcap_status(
+            self.camera_handle, ctypes.byref(captureStatus)), "dcamcap_status")
+        
+
+        if captureStatus.value == DCAMCAP_STATUS_BUSY:
+            paramstart = DCAMWAIT_START(
+                    0, 
+                    0, 
+                    DCAMWAIT_CAPEVENT_STOPPED, 
+                    DCAMWAIT_TIMEOUT_INFINITE) #1000 is the timeout. Remember it when changin the tmie exposure
+            paramstart.size = ctypes.sizeof(paramstart)
+            self.checkStatus(dcam.dcamwait_start(self.wait_handle,
+                                            ctypes.byref(paramstart)),
+                             "dcamwait_start")
+
+
+
+        #=======================================================================
+        # paramwait = DCAMWAIT_START(0, 0, DCAMWAIT_RECEVENT_STOPPED, 10000)
+        # paramwait.size = ctypes.sizeof(paramwait)
+        # print(self.checkStatus(dcam.dcamwait_start(self.wait_handle, ctypes.byref(paramwait)), "dcamwait_start"))
+        #=======================================================================
+        
+        self.checkStatus(dcam.dcamcap_stop(self.camera_handle),"dcamcap_stop")  
+        
+        #When the host software calls the dcamrec_close() function, all of the file information is stored.
+        # Be aware that if the host software terminates without calling the dcamrec_close() function, some data may be lost.
+        #print(self.checkStatus(dcam.dcamcap_stop(self.camera_handle),"dcamcap_stop"))
+        self.checkStatus(dcam.dcamrec_close(self.rec_handle), "dcamrec_close")
+        
+        #=======================================================================
+        # paramrecstatus = DCAMREC_STATUS(0, 0, 0, 0, 0, 0, 0, 0)
+        # 
+        # paramrecstatus.size = ctypes.sizeof(paramrecstatus)
+        # print(self.checkStatus(dcam.dcamrec_status(self.rec_handle, ctypes.byref(paramrecstatus)), "dcamrec_status"))
+        # 
+        # paramtransfer = DCAMCAP_TRANSFERINFO(0, DCAMCAP_TRANSFERKIND_FRAME, 0, 0)
+        # 
+        # paramtransfer.size = ctypes.sizeof(paramtransfer)
+        # self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
+        #                                        ctypes.byref(paramtransfer)),
+        #                  "dcamcap_transferinfo")
+        # print(paramtransfer.nFrameCount)
+        #=======================================================================
+        
+        
+        
+       
+    
+    
+    
+#======================================================================================================================================================
     
 class HamamatsuDeviceMR(HamamatsuDevice):
     """
@@ -1410,6 +1533,31 @@ if (error_code != DCAMERR_NOERROR):
 
 n_cameras = paraminit.iDeviceCount
 
+if __name__ == "__main__":
+    
+    import sys
+    import pyqtgraph as pg
+    import qtpy
+    from qtpy.QtWidgets import QApplication            
+    
+    hamamatsu = HamamatsuDevice(camera_id=0, frame_x=2048, frame_y=2048, acquisition_mode="fixed_length", 
+                                           number_frames=1, exposure=0.01, 
+                                           trsource="internal", trmode="normal", trpolarity="positive",
+                                           subarrayh_pos=0, subarrayv_pos = 0,
+                                           binning = 1, hardware = None)
+    print("found: {} cameras".format(n_cameras))
+    print("camera 0 model:", hamamatsu.getModelInfo())
+    print("=====================")
+    print(hamamatsu.getPropertiesValues())
+    
+    hamamatsu.startAcquisition()
+    [frame, dims] = hamamatsu.getLastFrame() 
+    np_data = frame.getData()  
+    pg.image(np.reshape(np_data,(2048, 2048)).T)
+    hamamatsu.stopAcquisition()
+    hamamatsu.shutdown()
+    if sys.flags.interactive !=1 or not hasattr(qtpy.QtCore, 'PYQT_VERSION'):
+        QApplication.exec_()
 #
 # The MIT License
 #

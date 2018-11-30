@@ -1,0 +1,17 @@
+2018-11-30T17:41:42|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 93, in run
+    self.camera.hamamatsu.startAcquisition()
+AttributeError: 'HamamatsuHardware' object has no attribute 'hamamatsu'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 25, in run
+    self.measurement._thread_run()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\measurement.py", line 179, in _thread_run
+    self.run()
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 226, in run
+    self.camera.hamamatsu.stopAcquisition()
+AttributeError: 'HamamatsuHardware' object has no attribute 'hamamatsu'
+
+2018-11-30T17:41:42|ERROR|HamamatsuMeasurement|hamamatsu_image Failed to update figure1: 'HamamatsuMeasurement' object has no attribute 'autoscale'. ['Traceback (most recent call last):\n', '  File "C:\\ProgramData\\Anaconda3\\lib\\site-packages\\ScopeFoundry\\measurement.py", line 273, in _on_display_update_timer\n    self.update_display()\n', '  File "C:\\LabPrograms\\Python\\Camera-ScopeFoundry\\CameraMeasurement.py", line 80, in update_display\n    self.imv.setImage((self.image).T, autoLevels=self.autoLevels, autoRange=self.autoscale)\n', "AttributeError: 'HamamatsuMeasurement' object has no attribute 'autoscale'\n"]
