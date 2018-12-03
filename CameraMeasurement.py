@@ -23,15 +23,15 @@ class HamamatsuMeasurement(Measurement):
         self.ui = load_qt_ui_file(self.ui_filename)
         self.settings.New('record', dtype=bool, initial=False, hardware_set_func=self.setRecord, hardware_read_func=self.getRecord, reread_from_hardware_after_write=True)
         self.settings.New('save_h5', dtype=bool, initial=False, hardware_set_func=self.setSaveH5, hardware_read_func=self.getSaveH5, reread_from_hardware_after_write=True)
-        self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.02 , hardware_set_func=self.setRefresh)
-        self.settings.New('autoscale', dtype=bool, initial=True, hardware_set_func=self.setautoScale)
+        self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.02 , hardware_set_func=self.setRefresh, vmin = 0)
+        self.settings.New('autoRange', dtype=bool, initial=True, hardware_set_func=self.setautoRange)
         self.settings.New('autoLevels', dtype=bool, initial=True, hardware_set_func=self.setautoLevels)
         self.settings.New('level_min', dtype=int, initial=60, hardware_set_func=self.setminLevel)
         self.settings.New('level_max', dtype=int, initial=150, hardware_set_func=self.setmaxLevel)
         self.settings.New('threshold', dtype=int, initial=500, hardware_set_func=self.setThreshold)
         self.camera = self.app.hardware['HamamatsuHardware']
         
-        self.autoscale = self.settings.autoscale.val
+        self.autoRange = self.settings.autoRange.val
         self.display_update_period = self.settings.refresh_period.val
         self.autoLevels = self.settings.autoLevels.val
         self.level_min = self.settings.level_min.val
@@ -53,6 +53,7 @@ class HamamatsuMeasurement(Measurement):
         
         # connect ui widgets of live settings
         self.settings.autoLevels.connect_to_widget(self.ui.autoLevels_checkBox)
+        self.settings.autoRange.connect_to_widget(self.ui.autoRange_checkBox)
         self.settings.level_min.connect_to_widget(self.ui.min_doubleSpinBox) #spinBox doesn't work nut it would be better
         self.settings.level_max.connect_to_widget(self.ui.max_doubleSpinBox) #spinBox doesn't work nut it would be better
         
@@ -76,9 +77,9 @@ class HamamatsuMeasurement(Measurement):
         #self.imv.setImage(np.reshape(self.np_data,(self.camera.subarrayh.val, self.camera.subarrayv.val)).T)
         #self.imv.setImage(self.image, autoLevels=False, levels=(100,340))
         if self.autoLevels == False:  
-            self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoscale.val, levels=(self.level_min, self.level_max))
+            self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoRange.val, levels=(self.level_min, self.level_max))
         else: #levels should not be sent when autoLevels is True, otherwise the image is displayed with them
-            self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoscale.val)
+            self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoRange.val)
             
     def run(self):
         
@@ -206,13 +207,12 @@ class HamamatsuMeasurement(Measurement):
                                     
                                     upgraded_last_frame_index = self.camera.hamamatsu.getTransferInfo()[0] # upgrades the transfer information
                                     
-                                    print('upgraded_last_frame_index: ' , upgraded_last_frame_index)
-                                    
                                     stalking_number = stalking_number + self.camera.hamamatsu.backlog - 1
                                     
-                                    print('stalking_number: ' , stalking_number)
-                                    
-                                    print('The camera is at {} passes from you'.format(self.camera.hamamatsu.number_image_buffers - stalking_number))
+                                    if self.debug:
+                                        print('upgraded_last_frame_index: ' , upgraded_last_frame_index)
+                                        print('stalking_number: ' , stalking_number)
+                                        print('The camera is at {} passes from you'.format(self.camera.hamamatsu.number_image_buffers - stalking_number))
                                     
                                     if stalking_number + self.camera.hamamatsu.backlog > self.camera.hamamatsu.number_image_buffers: 
                                         self.camera.hamamatsu.stopAcquisitionNotReleasing() #stop acquisition when we know that at next iteration, some images may be rewritten
@@ -232,8 +232,8 @@ class HamamatsuMeasurement(Measurement):
     def setRefresh(self, refresh_period):  
         self.display_update_period = refresh_period
     
-    def setautoScale(self, autoscale):
-        self.autoscale = autoscale
+    def setautoRange(self, autoRange):
+        self.autoRange = autoRange
 
     def setautoLevels(self, autoLevels):
         self.autoLevels = autoLevels
