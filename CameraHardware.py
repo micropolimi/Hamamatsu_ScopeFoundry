@@ -18,11 +18,11 @@ class HamamatsuHardware(HardwareComponent):
         self.camera = self.add_logged_quantity('camera', dtype=str, si=False, 
                                                ro=1, initial = 'No camera found' )
         
-        self.temperature = self.add_logged_quantity('temperature (C)', dtype=str, si=False, ro=1)
+        self.temperature = self.add_logged_quantity('temperature ' + chr(176) + 'C', dtype=str, si=False, ro=1)
                                                     
         
-        self.exposure_time = self.add_logged_quantity('exposure_time (sec)', dtype = float, si = False, ro = 0, 
-                                                       spinbox_step = 0.01, spinbox_decimals = 6, initial = 0.01, reread_from_hardware_after_write = True,
+        self.exposure_time = self.add_logged_quantity('exposure_time', dtype = float, si = False, ro = 0, 
+                                                       spinbox_step = 0.01, spinbox_decimals = 6, initial = 0.01, unit = 's', reread_from_hardware_after_write = True,
                                                        vmin = 0)
         
         self.internal_frame_rate = self.add_logged_quantity('internal_frame_rate', dtype = float, si = False, ro = 1,

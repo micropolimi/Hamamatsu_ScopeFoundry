@@ -1,0 +1,11 @@
+2018-12-03T18:07:29|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 452, in on_edit_finished
+    self.update_value(widget.text())
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
+    self.hardware_set_func(self.val)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraApp.py", line 61, in setDirFunc
+    os.makedirs(self.settings['save_dir'])
+  File "C:\ProgramData\Anaconda3\lib\os.py", line 221, in makedirs
+    mkdir(name, mode)
+FileNotFoundError: [WinError 3] Impossibile trovare il percorso specificato: ''
+

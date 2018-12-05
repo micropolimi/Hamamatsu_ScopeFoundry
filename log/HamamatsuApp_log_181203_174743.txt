@@ -1,0 +1,9 @@
+2018-12-03T17:47:44|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraApp.py", line 65, in <module>
+    app = HamamatsuApp(sys.argv)
+  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraApp.py", line 33, in __init__
+    self.settings.save_dir.update_value()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 220, in update_value
+    new_val = self.sender().text()
+AttributeError: 'NoneType' object has no attribute 'text'
+

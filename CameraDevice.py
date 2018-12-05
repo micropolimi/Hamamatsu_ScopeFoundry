@@ -654,10 +654,10 @@ class HamamatsuDevice(object):
         '''
         
         if self.camera_model ==  "C11440-22CU":
-            T = self.getPropertyValue("sensor_cooler_status")[0] 
+            T = 'mode ' + str(self.getPropertyValue("sensor_cooler_status")[0])
         else:
             T = self.getPropertyValue("sensor_temperature")[0] 
-        return str(T)  
+        return T  
     
     def isCameraProperty(self, property_name):
         """
@@ -1214,9 +1214,8 @@ class HamamatsuDevice(object):
         return sorted(text_values, key = text_values.get)
     
     def startRecording(self):
-        '''
-        First attempts using record...
-        ''' 
+        '''  Starts recording session, that will acquire self.number_frames images. Data are saved in the directory specified with the widget. ''' 
+        
         # ACCESS IMAGE DATA
         # During a recording session, the host software can access the frames that have already been recorded by using the dcamrec_lockframe() or dcamrec_copyframe() function.
         # These functions will cause some stress to the computer so we do not recommend using them during a recording. 
@@ -1247,20 +1246,16 @@ class HamamatsuDevice(object):
         self.checkStatus(dcam.dcamcap_start(self.camera_handle,
                                     DCAMCAP_START_SNAP),
                                                   "dcamcap_start")
-        print(self.checkStatus(dcam.dcamrec_pause(self.rec_handle), ""))
-          
-        #=======================================================================
-        # paramrecstatus = DCAMREC_STATUS(0, 0, 0, 0, 0, 0, 0, 0)
-        # paramrecstatus.size = ctypes.sizeof(paramrecstatus)
-        # print(self.checkStatus(dcam.dcamrec_status(self.rec_handle, ctypes.byref(paramrec)), "dcamrec_status"))
-        #=======================================================================
-    def stopRecording(self):    
+        
+    def stopRecording(self):
+        '''  Waits  until capturing event stopped, then closes the recording session '''       
+            
               
         captureStatus = ctypes.c_int32(0)
         self.checkStatus(dcam.dcamcap_status(
             self.camera_handle, ctypes.byref(captureStatus)), "dcamcap_status")
-        
-
+          
+  
         if captureStatus.value == DCAMCAP_STATUS_BUSY:
             paramstart = DCAMWAIT_START(
                     0, 
@@ -1268,17 +1263,8 @@ class HamamatsuDevice(object):
                     DCAMWAIT_CAPEVENT_STOPPED, 
                     DCAMWAIT_TIMEOUT_INFINITE) #1000 is the timeout. Remember it when changin the tmie exposure
             paramstart.size = ctypes.sizeof(paramstart)
-            self.checkStatus(dcam.dcamwait_start(self.wait_handle,
-                                            ctypes.byref(paramstart)),
-                             "dcamwait_start")
+            self.checkStatus(dcam.dcamwait_start(self.wait_handle, ctypes.byref(paramstart)), "dcamwait_start")
 
-
-
-        #=======================================================================
-        # paramwait = DCAMWAIT_START(0, 0, DCAMWAIT_RECEVENT_STOPPED, 10000)
-        # paramwait.size = ctypes.sizeof(paramwait)
-        # print(self.checkStatus(dcam.dcamwait_start(self.wait_handle, ctypes.byref(paramwait)), "dcamwait_start"))
-        #=======================================================================
         
         self.checkStatus(dcam.dcamcap_stop(self.camera_handle),"dcamcap_stop")  
         
@@ -1286,26 +1272,7 @@ class HamamatsuDevice(object):
         # Be aware that if the host software terminates without calling the dcamrec_close() function, some data may be lost.
         #print(self.checkStatus(dcam.dcamcap_stop(self.camera_handle),"dcamcap_stop"))
         self.checkStatus(dcam.dcamrec_close(self.rec_handle), "dcamrec_close")
-        
-        #=======================================================================
-        # paramrecstatus = DCAMREC_STATUS(0, 0, 0, 0, 0, 0, 0, 0)
-        # 
-        # paramrecstatus.size = ctypes.sizeof(paramrecstatus)
-        # print(self.checkStatus(dcam.dcamrec_status(self.rec_handle, ctypes.byref(paramrecstatus)), "dcamrec_status"))
-        # 
-        # paramtransfer = DCAMCAP_TRANSFERINFO(0, DCAMCAP_TRANSFERKIND_FRAME, 0, 0)
-        # 
-        # paramtransfer.size = ctypes.sizeof(paramtransfer)
-        # self.checkStatus(dcam.dcamcap_transferinfo(self.camera_handle,
-        #                                        ctypes.byref(paramtransfer)),
-        #                  "dcamcap_transferinfo")
-        # print(paramtransfer.nFrameCount)
-        #=======================================================================
-        
-        
-        
        
-    
     
     
 #======================================================================================================================================================

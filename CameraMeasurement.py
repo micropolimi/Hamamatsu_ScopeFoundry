@@ -16,9 +16,11 @@ class HamamatsuMeasurement(Measurement):
     name = "hamamatsu_image"
         
     def setup(self):
+        
         "..."
 
         self.ui_filename = sibling_path(__file__, "form.ui")
+        
     
         self.ui = load_qt_ui_file(self.ui_filename)
         self.settings.New('record', dtype=bool, initial=False, hardware_set_func=self.setRecord, hardware_read_func=self.getRecord, reread_from_hardware_after_write=True)
@@ -150,12 +152,13 @@ class HamamatsuMeasurement(Measurement):
                             self.initH5()
                             save = False #at next cycle, we don't do initH5 again (we have already created the file)
                         
-                        total = np.mean(self.np_data)
+                        mean_value = np.mean(self.np_data)
                         last_frame_index = self.camera.hamamatsu.buffer_index
                         #print(self.camera.hamamatsu.last_frame_number)
-                        print(total)
+                        if self.debug:
+                            print("The mean is: ", mean_value)
 #===============================================================================
-#                         if total > self.settings['threshold']:
+#                         if mean_value > self.settings['threshold']:
 #                             print("\n \n ******* \n \n Saving :D !\n \n *******")
 #                             j = 0
 #                             
@@ -188,7 +191,7 @@ class HamamatsuMeasurement(Measurement):
 #                             print(self.camera.hamamatsu.last_frame_number)
 #===============================================================================
                      
-                        if total > self.settings['threshold']:
+                        if mean_value > self.settings['threshold']:
                             
                             print("\n \n ******* \n \n Saving :D !\n \n *******")
                             j = 0
@@ -198,15 +201,16 @@ class HamamatsuMeasurement(Measurement):
                             while j < self.camera.number_frames.val: 
                                 
                                 self.get_and_save_Frame(j,last_frame_index)
-                                
                                 last_frame_index = self.updateIndex(last_frame_index)
-                                print(last_frame_index)
+                                
+                                if self.debug:
+                                    print("The last_frame_index is: ", last_frame_index)
+                                    
                                 j+=1
                                 
                                 if not remaining:
-                                    
                                     upgraded_last_frame_index = self.camera.hamamatsu.getTransferInfo()[0] # upgrades the transfer information
-                                    
+                                    #The stalking_number represents the relative steps the camera has made in acquisition with respect to the saving.
                                     stalking_number = stalking_number + self.camera.hamamatsu.backlog - 1
                                     
                                     if self.debug:
@@ -216,11 +220,12 @@ class HamamatsuMeasurement(Measurement):
                                     
                                     if stalking_number + self.camera.hamamatsu.backlog > self.camera.hamamatsu.number_image_buffers: 
                                         self.camera.hamamatsu.stopAcquisitionNotReleasing() #stop acquisition when we know that at next iteration, some images may be rewritten
-                                        remaining = True
+                                        remaining = True #if the buffer reach us, we execute the "while" without the "if not remaining" block.
                                    
                             self.interrupt()
                             self.camera.hamamatsu.stopAcquisition()
-                            print(self.camera.hamamatsu.last_frame_number)
+                            if self.debug:
+                                print("The last_frame_number is: ", self.camera.hamamatsu.last_frame_number)
                          
         finally:
             
@@ -331,10 +336,13 @@ class HamamatsuMeasurement(Measurement):
         self.settings['progress'] = saveindex*100./self.camera.hamamatsu.number_image_buffers
     
     def updateIndex(self, last_frame_index):
-        
+        """
+        Update the index of the image to fetch from buffer. 
+        If we reach the end of the buffer, we reset the index.
+        """
         last_frame_index+=1
         
-        if last_frame_index > self.camera.hamamatsu.number_image_buffers - 1:
-            last_frame_index = 0
+        if last_frame_index > self.camera.hamamatsu.number_image_buffers - 1: #if we reach the end of the buffer
+            last_frame_index = 0 #reset
         
         return last_frame_index
