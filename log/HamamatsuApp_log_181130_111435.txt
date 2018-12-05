@@ -1,6 +1,0 @@
-2018-11-30T11:14:38|WARNING|LoggedQuantity|save_h5 read_from_hardware called when not connected to hardware
-2018-11-30T11:14:41|WARNING|LoggedQuantity|record read_from_hardware called when not connected to hardware
-2018-11-30T11:14:42|WARNING|LoggedQuantity|record read_from_hardware called when not connected to hardware
-2018-11-30T11:14:43|WARNING|LoggedQuantity|record read_from_hardware called when not connected to hardware
-2018-11-30T11:14:43|WARNING|LoggedQuantity|save_h5 read_from_hardware called when not connected to hardware
-2018-11-30T11:14:44|WARNING|LoggedQuantity|record read_from_hardware called when not connected to hardware

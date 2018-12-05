@@ -1,7 +1,0 @@
-2018-11-30T10:45:01|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
-  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\logged_quantity.py", line 241, in update_value
-    self.hardware_set_func(self.val)
-  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraMeasurement.py", line 256, in setSaveH5
-    self.settings.record.change_readonly1(True)
-AttributeError: 'LoggedQuantity' object has no attribute 'change_readonly1'
-

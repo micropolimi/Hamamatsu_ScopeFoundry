@@ -1,9 +1,0 @@
-2018-11-15T16:40:45|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
-  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\hardware.py", line 219, in enable_connection
-    raise err
-  File "C:\ProgramData\Anaconda3\lib\site-packages\ScopeFoundry\hardware.py", line 212, in enable_connection
-    self.disconnect()
-  File "C:\Users\Admin\Desktop\Camera-ScopeFoundry\CameraHardware.py", line 95, in disconnect
-    self.trolarity.change_readonly(False)
-AttributeError: 'HamamatsuHardware' object has no attribute 'trolarity'
-

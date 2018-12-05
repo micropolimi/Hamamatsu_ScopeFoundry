@@ -1,7 +1,0 @@
-2018-12-03T17:44:51|CRITICAL|root|Unhandled exception:Traceback (most recent call last):
-  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraApp.py", line 64, in <module>
-    app = HamamatsuApp(sys.argv)
-  File "C:\LabPrograms\Python\Camera-ScopeFoundry\CameraApp.py", line 33, in __init__
-    self.settings.save_dir.update_value(QtWidgets.QFileDialog.getExistingDirectory("D:\\Data\\temp"))
-TypeError: getExistingDirectory(parent: QWidget = None, caption: str = '', directory: str = '', options: Union[QFileDialog.Options, QFileDialog.Option] = QFileDialog.ShowDirsOnly): argument 1 has unexpected type 'str'
-

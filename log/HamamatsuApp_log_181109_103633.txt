@@ -1,1 +1,0 @@
-2018-11-09T10:36:44|ERROR|HamamatsuApp|tried to disconnect HamamatsuHardware: 'HamamatsuHardware' object has no attribute 'dcam'
