@@ -24,7 +24,7 @@ class HamamatsuApp(BaseMicroscopeApp):
                                 # the *kwds this will give a problem
         
         #self.settings.save_dir.update_value(QtWidgets.QFileDialog.getExistingDirectory(directory = "D:\\Data\\temp"))
-        self.settings['save_dir'] = "D:\\Data\\temp"
+        self.settings['save_dir'] = "E:\\data\\DMD" #PUT ALWAYS TWO SLASHES!!!!
         self.settings.save_dir.hardware_set_func = self.setDirFunc #calls set dir func when the save_dir widget is changed
     
 #     def setup_default_ui(self, *kwds):
@@ -33,6 +33,11 @@ class HamamatsuApp(BaseMicroscopeApp):
 #         self.ui.action_set_data_dir.triggered.connect(self.file_browser)
 #         self.connect_to_browse_widgets(self.ui.save_dir_lineEdit, self.ui.save_dir_browse_pushButton)
     def setup_default_ui(self):
+        
+        """
+        This function has been redefined just for adding the ability to 
+        open the selected folder! Otherwise it opens the project folder.
+        """
         self.ui.show()
         self.ui.activateWindow()
                 
@@ -151,14 +156,13 @@ class HamamatsuApp(BaseMicroscopeApp):
             os.makedirs(self.settings['save_dir'])
     
     def file_browser(self):
-        #print("ogorigh")
+
         if self.settings.save_dir.is_dir:
             fname = QtWidgets.QFileDialog.getExistingDirectory(directory = self.settings.save_dir.val)
         else:
             fname, _ = QtWidgets.QFileDialog.getOpenFileName(directory = self.settings.save_dir.val)
         self.settings.save_dir.log.debug(repr(fname))
         if fname:
-            #print("ihiihih")
             self.settings.save_dir.update_value(fname)
       
     def connect_to_browse_widgets(self, lineEdit, pushButton):
