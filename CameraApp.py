@@ -126,9 +126,11 @@ class HamamatsuApp(BaseMicroscopeApp):
     
     def setup(self):
         
+        from DMDHardware import DmdHardware
         from CameraHardware import HamamatsuHardware
-        self.add_hardware(HamamatsuHardware(self))
         
+        self.add_hardware(HamamatsuHardware(self))
+        self.add_hardware(DmdHardware(self))
         print("Adding Hardware Components")
         
         from CameraMeasurement import HamamatsuMeasurement
