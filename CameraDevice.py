@@ -671,6 +671,7 @@ class HamamatsuDevice(object):
     def setExposure(self, exposure):
         
         self.setPropertyValue("exposure_time", exposure)
+        self.hardware.internal_frame_rate.read_from_hardware()
         
     def getExposure(self):
         
@@ -1497,7 +1498,9 @@ paraminit.size = ctypes.sizeof(paraminit)
 error_code = dcam.dcamapi_init(ctypes.byref(paraminit))
 if (error_code != DCAMERR_NOERROR):
     raise DCAMException("DCAM initialization failed with error code " + str(error_code))
-
+"""
+If the camera is not connected, you will have an error. Change?
+"""
 n_cameras = paraminit.iDeviceCount
 
 if __name__ == "__main__":

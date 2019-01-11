@@ -28,8 +28,8 @@ class HamamatsuMeasurement(Measurement):
         self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.02 , hardware_set_func=self.setRefresh, vmin = 0)
         self.settings.New('autoRange', dtype=bool, initial=True, hardware_set_func=self.setautoRange)
         self.settings.New('autoLevels', dtype=bool, initial=True, hardware_set_func=self.setautoLevels)
-        self.settings.New('level_min', dtype=int, initial=60, hardware_set_func=self.setminLevel)
-        self.settings.New('level_max', dtype=int, initial=150, hardware_set_func=self.setmaxLevel)
+        self.settings.New('level_min', dtype=int, initial=60, hardware_set_func=self.setminLevel, hardware_read_func = self.getminLevel)
+        self.settings.New('level_max', dtype=int, initial=150, hardware_set_func=self.setmaxLevel, hardware_read_func = self.getmaxLevel)
         self.settings.New('threshold', dtype=int, initial=500, hardware_set_func=self.setThreshold)
         self.camera = self.app.hardware['HamamatsuHardware']
         
@@ -82,7 +82,9 @@ class HamamatsuMeasurement(Measurement):
             self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoRange.val, levels=(self.level_min, self.level_max))
         else: #levels should not be sent when autoLevels is True, otherwise the image is displayed with them
             self.imv.setImage((self.image).T, autoLevels=self.settings.autoLevels.val, autoRange=self.settings.autoRange.val)
-            
+            self.settings.level_min.read_from_hardware()
+            self.settings.level_max.read_from_hardware()
+             
     def run(self):
         
         self.eff_subarrayh = int(self.camera.subarrayh.val/self.camera.binning.val)
@@ -242,13 +244,19 @@ class HamamatsuMeasurement(Measurement):
 
     def setautoLevels(self, autoLevels):
         self.autoLevels = autoLevels
-        
+            
     def setminLevel(self, level_min):
         self.level_min = level_min
         
     def setmaxLevel(self, level_max):
         self.level_max = level_max
+    
+    def getminLevel(self):
+        return self.imv.levelMin
         
+    def getmaxLevel(self):
+        return self.imv.levelMax
+            
     def setThreshold(self, threshold):
         self.threshold = threshold
     

@@ -10,6 +10,7 @@ import os
 from qtpy import QtCore, QtGui, QtWidgets
 from ScopeFoundry.helper_funcs import confirm_on_close, ignore_on_close, load_qt_ui_file, \
     OrderedAttrDict, sibling_path, get_logger_from_class, str2bool
+from PyQt5.Qt import QMessageBox
     
 class HamamatsuApp(BaseMicroscopeApp):
     
@@ -133,14 +134,15 @@ class HamamatsuApp(BaseMicroscopeApp):
         
         from DMDHardware import DmdHardware
         from CameraHardware import HamamatsuHardware
+        from pi_stage_HW_test import PIStage
         
         self.add_hardware(HamamatsuHardware(self))
         self.add_hardware(DmdHardware(self))
+        self.add_hardware(PIStage(self))
         print("Adding Hardware Components")
         
         from CameraMeasurement import HamamatsuMeasurement
         self.add_measurement(HamamatsuMeasurement(self))
-        
         print("Adding measurement components")
         
         self.ui.show()
@@ -148,7 +150,7 @@ class HamamatsuApp(BaseMicroscopeApp):
     
     def setDirFunc(self, val = None):
         """
-        Gets called everytime we modify the directory.
+        Gets called every time we modify the directory.
         If it does not exist, we create a new one
         """
         
