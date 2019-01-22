@@ -671,7 +671,8 @@ class HamamatsuDevice(object):
     def setExposure(self, exposure):
         
         self.setPropertyValue("exposure_time", exposure)
-        self.hardware.internal_frame_rate.read_from_hardware()
+        if self.hardware.internal_frame_rate.hardware_read_func: #otherwise, if we have not defined yet the function, we have an error...
+            self.hardware.internal_frame_rate.read_from_hardware()
         
     def getExposure(self):
         
