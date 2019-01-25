@@ -6,7 +6,7 @@
 
 from ScopeFoundry import HardwareComponent
 import CameraDevice
-from CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, dcam, DCAMERR_NOERROR, DCAMException 
+from CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, DCAMERR_NOERROR, DCAMException 
 
 
 class HamamatsuHardware(HardwareComponent):
