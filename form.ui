@@ -80,9 +80,9 @@
         <widget class="QDoubleSpinBox" name="max_doubleSpinBox">
          <property name="geometry">
           <rect>
-           <x>160</x>
+           <x>180</x>
            <y>30</y>
-           <width>41</width>
+           <width>71</width>
            <height>20</height>
           </rect>
          </property>
@@ -103,7 +103,7 @@
         <widget class="QLabel" name="label_min">
          <property name="geometry">
           <rect>
-           <x>210</x>
+           <x>260</x>
            <y>30</y>
            <width>21</width>
            <height>16</height>

@@ -25,7 +25,7 @@ class HamamatsuApp(BaseMicroscopeApp):
                                 # the *kwds this will give a problem
         
         #self.settings.save_dir.update_value(QtWidgets.QFileDialog.getExistingDirectory(directory = "D:\\Data\\temp"))
-        self.settings['save_dir'] = "E:\\data\\DMD" #PUT ALWAYS TWO SLASHES!!!!
+        self.settings['save_dir'] = "D:\\Data\\Nuova_Cartella" #PUT ALWAYS TWO SLASHES!!!!
         self.settings.save_dir.hardware_set_func = self.setDirFunc #calls set dir func when the save_dir widget is changed
     
 #     def setup_default_ui(self, *kwds):
@@ -132,13 +132,19 @@ class HamamatsuApp(BaseMicroscopeApp):
     
     def setup(self):
         
-        from DMDHardware import DmdHardware
         from CameraHardware import HamamatsuHardware
-        from pi_stage_HW_test import PIStage
+        try:
+            from DMDHardware import DmdHardware
+            from pi_stage_HW_test import PIStage
+        except:
+            pass
         
         self.add_hardware(HamamatsuHardware(self))
-        self.add_hardware(DmdHardware(self))
-        self.add_hardware(PIStage(self))
+        try:
+            self.add_hardware(DmdHardware(self))
+            self.add_hardware(PIStage(self))
+        except:
+            pass
         print("Adding Hardware Components")
         
         from CameraMeasurement import HamamatsuMeasurement

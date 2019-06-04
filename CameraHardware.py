@@ -67,6 +67,10 @@ class HamamatsuHardware(HardwareComponent):
         self.trpolarity = self.add_logged_quantity('trigger_polarity', dtype=str, si=False, ro=0, 
                                                    choices = ["positive", "negative"], initial = 'positive', reread_from_hardware_after_write = True)
         
+        self.tractive = self.add_logged_quantity('trigger_active', dtype=str, si=False, ro=0, 
+                                                   choices = ["edge", "syncreadout"], initial = 'edge', reread_from_hardware_after_write = True)
+        
+        
 #         self.preset_sizes = self.add_logged_quantity('preset_sizes', dtype=str, si=False, ro = 0, 
 #                                                      choices = ["2048x2048",
 #                                                                 "2048x1024",
@@ -106,6 +110,7 @@ class HamamatsuHardware(HardwareComponent):
         self.hamamatsu = HamamatsuDevice(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, 
                                            number_frames=self.number_frames.val, exposure=self.exposure_time.val, 
                                            trsource=self.trsource.val, trmode=self.trmode.val, trpolarity=self.trpolarity.val,
+                                           tractive=self.tractive.val,
                                            subarrayh_pos=self.subarrayh_pos.val, subarrayv_pos = self.subarrayv_pos.val,
                                            binning = self.binning.val, hardware = self) #maybe with more cameras we have to change
         
@@ -117,6 +122,7 @@ class HamamatsuHardware(HardwareComponent):
         self.trsource.hardware_read_func = self.hamamatsu.getTriggerSource
         self.trmode.hardware_read_func = self.hamamatsu.getTriggerMode
         self.trpolarity.hardware_read_func = self.hamamatsu.getTriggerPolarity
+        self.tractive.hardware_read_func = self.hamamatsu.getTriggerActive        
         self.subarrayh.hardware_read_func = self.hamamatsu.getSubarrayH
         self.subarrayv.hardware_read_func = self.hamamatsu.getSubarrayV
         self.subarrayh_pos.hardware_read_func = self.hamamatsu.getSubarrayHpos
@@ -134,6 +140,7 @@ class HamamatsuHardware(HardwareComponent):
         self.trsource.hardware_set_func = self.hamamatsu.setTriggerSource
         self.trmode.hardware_set_func = self.hamamatsu.setTriggerMode
         self.trpolarity.hardware_set_func = self.hamamatsu.setTriggerPolarity
+        self.tractive.hardware_set_func = self.hamamatsu.setTriggerActive        
         self.binning.hardware_set_func = self.hamamatsu.setBinning
         
         self.optimal_offset.hardware_set_func = self.readOnlyWhenOpt

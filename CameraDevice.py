@@ -322,7 +322,7 @@ class HamamatsuDevice(object):
     Storage for the data from the camera is allocated dynamically and
     copied out of the camera buffers.
     """
-    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, trsource, trmode, trpolarity, 
+    def __init__(self, frame_x, frame_y, acquisition_mode, number_frames, exposure, trsource, trmode, trpolarity, tractive,
                  subarrayh_pos, subarrayv_pos, binning, hardware, camera_id = None, **kwds):
         """
         Open the connection to the camera specified by camera_id.
@@ -355,6 +355,7 @@ class HamamatsuDevice(object):
         self.trig_dict_source = {"internal":DCAMPROP_TRIGGERSOURCE__INTERNAL, "external":DCAMPROP_TRIGGERSOURCE__EXTERNAL}
         self.trig_dict_mode = {"normal":DCAMPROP_TRIGGER_MODE__NORMAL, "start":DCAMPROP_TRIGGER_MODE__START}
         self.trig_dict_polarity = {"negative":DCAMPROP_TRIGGERPOLARITY__NEGATIVE, "positive":DCAMPROP_TRIGGERPOLARITY__POSITIVE}
+        self.trig_dict_active = {"edge":DCAMPROP_TRIGGERACTIVE__EDGE, "syncreadout":DCAMPROP_TRIGGERACTIVE__SYNCREADOUT}
 
         self.acquisition_mode = acquisition_mode
         self.number_frames = number_frames
@@ -395,6 +396,7 @@ class HamamatsuDevice(object):
             self.setTriggerSource(trsource)
             self.setTriggerMode(trmode)
             self.setTriggerPolarity(trpolarity)
+            self.setTriggerActive(tractive)
             self.setSubarrayHpos(subarrayh_pos)
             self.setSubarrayVpos(subarrayv_pos)
             self.setBinning(binning)
@@ -918,6 +920,11 @@ class HamamatsuDevice(object):
         if self.isCapturing() != DCAMCAP_STATUS_BUSY:
             self.setPropertyValue("trigger_polarity", self.trig_dict_polarity[trpolarity])
             
+    def setTriggerActive(self, tractive):
+         
+        if self.isCapturing() != DCAMCAP_STATUS_BUSY:
+            self.setPropertyValue("trigger_active", self.trig_dict_active[tractive])
+            
     def getTriggerSource(self):
         
         inv_dict = {v: k for k, v in self.trig_dict_source.items()}
@@ -935,6 +942,12 @@ class HamamatsuDevice(object):
         inv_dict = {v: k for k, v in self.trig_dict_polarity.items()}
         
         return inv_dict[self.getPropertyValue("trigger_polarity")[0]]
+    
+    def getTriggerActive(self):
+        
+        inv_dict = {v: k for k, v in self.trig_dict_active.items()}
+
+        return inv_dict[self.getPropertyValue("trigger_active")[0]]
     
     def isCapturing(self):
         
@@ -960,7 +973,7 @@ class HamamatsuDevice(object):
                     0, 
                     0, 
                     DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 
-                    10000) #1000 is the timeout. Remember it when changin the tmie exposure
+                    DCAMWAIT_TIMEOUT_INFINITE) #1000 is the timeout. Remember it when changin the tmie exposure
             paramstart.size = ctypes.sizeof(paramstart)
             self.checkStatus(self.dcam.dcamwait_start(self.wait_handle,
                                             ctypes.byref(paramstart)),
@@ -1337,7 +1350,7 @@ class HamamatsuDeviceMR(HamamatsuDevice):
                     0, 
                     0, 
                     DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 
-                    10000) #1000 is the timeout. Remember it when changin the tmie exposure
+                    DCAMWAIT_TIMEOUT_INFINITE) #1000 is the timeout. Remember it when changin the tmie exposure
             paramstart.size = ctypes.sizeof(paramstart)
             self.checkStatus(self.dcam.dcamwait_start(self.wait_handle,
                                             ctypes.byref(paramstart)),
@@ -1513,10 +1526,10 @@ if __name__ == "__main__":
     
     hamamatsu = HamamatsuDevice(camera_id=0, frame_x=2048, frame_y=2048, acquisition_mode="fixed_length", 
                                            number_frames=1, exposure=0.01, 
-                                           trsource="internal", trmode="normal", trpolarity="positive",
+                                           trsource="internal", trmode="normal", trpolarity="positive", tractive="edge",
                                            subarrayh_pos=0, subarrayv_pos = 0,
                                            binning = 1, hardware = None)
-    print("found: {} cameras".format(n_cameras))
+    #print("found: {} cameras".format(n_cameras))
     print("camera 0 model:", hamamatsu.getModelInfo())
     print("=====================")
     print(hamamatsu.getPropertiesValues())
