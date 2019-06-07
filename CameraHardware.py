@@ -34,6 +34,8 @@ class HamamatsuHardware(HardwareComponent):
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, 
                                                       initial = 200, vmin = 1)
         
+        self.number_frames_on_the_run = self.add_logged_quantity("number_frames_on_the_run", dtype = int, si = False, ro = 0, 
+                                                      initial = 100, vmin = 1) 
         #For subarray we have imposed float, since otherwise I cannot modify the step (I should modify the logged quantities script, but I prefer left it untouched)
         self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=float, si = False, ro= 0,
                                                    spinbox_step = 4, spinbox_decimals = 0, initial = 2048, vmin = 4, vmax = 2048, reread_from_hardware_after_write = True)

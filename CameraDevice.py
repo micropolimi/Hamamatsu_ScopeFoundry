@@ -1044,6 +1044,31 @@ class HamamatsuDevice(object):
 
         return new_frames
     
+    def lastTotFrames(self, number):
+        """
+        Return a list of the ids of all the new frames since the last check.
+        Returns an empty list if the camera has already stopped and no frames
+        are available.
+    
+        This will block waiting for at least one new frame.
+        """
+    
+        frames = []
+    
+        if self.buffer_index > number:
+            for i in reversed(range(0, self.buffer_index)):
+                frames.append(i)
+        else:
+            for i in reversed(range(0, self.number_image_buffers)):
+                frames.append(i)
+                if len(frames) >= number:
+                    break
+    
+        if self.debug:
+            print(new_frames)
+            
+        return frames
+    
     def lastFrame(self):
         
         """
@@ -1127,6 +1152,33 @@ class HamamatsuDevice(object):
         frames = hc_data
 
 
+        return [frames, [self.frame_x, self.frame_y]]
+
+    def getLastTotFrames(self, number):
+        """
+        Gets all of the available frames.
+    
+        This will block waiting for new frames even if
+        there new frames available when it is called.
+        """
+        frames = []
+        
+        for n in self.lastTotFrames(number):
+            paramlock = DCAMBUF_FRAME(
+                0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            paramlock.size = ctypes.sizeof(paramlock)
+    
+            # Lock the frame in the camera buffer & get address.
+            self.checkStatus(self.dcam.dcambuf_lockframe(self.camera_handle,
+                                                         ctypes.byref(paramlock)),
+                             "dcambuf_lockframe")
+    
+            # Create storage for the frame & copy into this storage.
+            hc_data = HCamData(self.frame_bytes)
+            hc_data.copyData(paramlock.buf)
+    
+            frames.append(hc_data)
+    
         return [frames, [self.frame_x, self.frame_y]]
     
     def getRequiredFrame(self, required_index):
