@@ -1044,7 +1044,7 @@ class HamamatsuDevice(object):
 
         return new_frames
     
-    def lastTotFrames(self, number):
+    def lastTotFrames(self):
         """
         Return a list of the ids of all the new frames since the last check.
         Returns an empty list if the camera has already stopped and no frames
@@ -1054,18 +1054,32 @@ class HamamatsuDevice(object):
         """
     
         frames = []
-    
-        if self.buffer_index > number:
-            for i in reversed(range(0, self.buffer_index)):
-                frames.append(i)
-        else:
-            for i in reversed(range(0, self.number_image_buffers)):
-                frames.append(i)
-                if len(frames) >= number:
-                    break
-    
-        if self.debug:
-            print(new_frames)
+        """
+        Pay attention! With the below code we are inserting in frames the indexes of the temporally last
+        acquired images, considering the images in the whole buffer. In this way there is the risk that some
+        imaages could have been overwritten when the images are fetched from the camera.
+        """
+        
+        
+        for i in range(self.buffer_index+1, self.number_image_buffers):
+            frames.append(i)
+
+        for i in range(0, self.buffer_index+1):
+            frames.append(i)
+
+
+
+        # if self.buffer_index > number:
+        #     for i in reversed(range(0, self.buffer_index)):
+        #         frames.append(i)
+        # else:
+        #     for i in reversed(range(0, self.number_image_buffers)):
+        #         frames.append(i)
+        #         if len(frames) >= number:
+        #             break
+        #
+        # if self.debug:
+        #     print(new_frames)
             
         return frames
     
@@ -1093,7 +1107,7 @@ class HamamatsuDevice(object):
 
         if self.debug:
             print(last_frame_index)
-
+            
         return last_frame_index
     
     
@@ -1154,16 +1168,13 @@ class HamamatsuDevice(object):
 
         return [frames, [self.frame_x, self.frame_y]]
 
-    def getLastTotFrames(self, number):
+    def getLastTotFrames(self):
         """
-        Gets all of the available frames.
-    
-        This will block waiting for new frames even if
-        there new frames available when it is called.
+        Gets the last frames in the buffer
         """
         frames = []
         
-        for n in self.lastTotFrames(number):
+        for n in self.lastTotFrames():
             paramlock = DCAMBUF_FRAME(
                 0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             paramlock.size = ctypes.sizeof(paramlock)
@@ -1229,6 +1240,35 @@ class HamamatsuDevice(object):
         self.checkStatus(self.dcam.dcambuf_alloc(self.camera_handle,
                                   ctypes.c_int32(self.number_image_buffers)),
                          "dcambuf_alloc")
+
+        # Start acquisition.
+        if self.acquisition_mode is "run_till_abort":
+            self.checkStatus(self.dcam.dcamcap_start(self.camera_handle,
+                                    DCAMCAP_START_SEQUENCE),
+                             "dcamcap_start")
+        
+        if self.acquisition_mode is "fixed_length":
+            self.checkStatus(self.dcam.dcamcap_start(self.camera_handle,
+                                    DCAMCAP_START_SNAP),
+                             "dcamcap_start")
+    def startAcquisitionWithoutAlloc(self):
+        """
+        Start data acquisition.
+        """
+
+        # Allocate Hamamatsu image buffers.
+        # We allocate enough to buffer 2 seconds of data or the specified 
+        # number of frames for a fixed length acquisition
+        
+        if self.acquisition_mode is "run_till_abort":
+            #n_buffers = int(20.0*self.getPropertyValue("internal_frame_rate")[0])
+            n_buffers = self.number_frames
+        
+        
+        elif self.acquisition_mode is "fixed_length":
+            n_buffers = self.number_frames
+
+        self.number_image_buffers = n_buffers
 
         # Start acquisition.
         if self.acquisition_mode is "run_till_abort":
