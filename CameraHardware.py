@@ -5,8 +5,8 @@
 """
 
 from ScopeFoundry import HardwareComponent
-import CameraDevice
-from CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, DCAMERR_NOERROR, DCAMException 
+import Hamamatsu_ScopeFoundry.CameraDevice
+from Hamamatsu_ScopeFoundry.CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, DCAMERR_NOERROR, DCAMException 
 
 
 class HamamatsuHardware(HardwareComponent):
@@ -182,4 +182,5 @@ class HamamatsuHardware(HardwareComponent):
         else:
             self.subarrayh_pos.change_readonly(False)
             self.subarrayv_pos.change_readonly(False)
+
             

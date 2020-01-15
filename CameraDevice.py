@@ -7,7 +7,7 @@ import ctypes
 import ctypes.util
 import numpy as np
 import time
-import CameraHardware
+import Hamamatsu_ScopeFoundry.CameraHardware
 from numpy import log2
 # Hamamatsu constants.
 
@@ -380,7 +380,6 @@ class HamamatsuDevice(object):
 
         # Get camera properties.
         self.properties = self.getCameraProperties()
-
         # Get camera max width, height.
         self.max_width = self.getPropertyValue("image_width")[0]
         self.max_height = self.getPropertyValue("image_height")[0]
@@ -512,6 +511,7 @@ class HamamatsuDevice(object):
                          "dcamdev_getstring")
 
         return string_value.value.decode(self.encoding)
+ 
 
     def getProperties(self):
         """
@@ -1083,6 +1083,34 @@ class HamamatsuDevice(object):
             
         return frames
     
+    def lastEvenFrames(self):
+        
+        even_frames = []
+
+        for i in range(self.buffer_index+1, self.number_image_buffers):
+            if i%2 == 0:
+                even_frames.append(i)
+
+        for i in range(0, self.buffer_index+1):
+            if i%2 == 0:
+                even_frames.append(i)
+
+        return even_frames
+    
+    def lastOddFrames(self):
+        
+        odd_frames = []
+        
+        for i in range(self.buffer_index+1, self.number_image_buffers):
+            if i%2 != 0:
+                odd_frames.append(i)
+
+        for i in range(0, self.buffer_index+1):
+            if i%2 != 0:
+                odd_frames.append(i)
+            
+        return odd_frames
+    
     def lastFrame(self):
         
         """
@@ -1105,9 +1133,6 @@ class HamamatsuDevice(object):
         last_frame_index = cur_buffer_index
         self.buffer_index = cur_buffer_index
 
-        if self.debug:
-            print(last_frame_index)
-            
         return last_frame_index
     
     
@@ -1175,6 +1200,50 @@ class HamamatsuDevice(object):
         frames = []
         
         for n in self.lastTotFrames():
+            paramlock = DCAMBUF_FRAME(
+                0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            paramlock.size = ctypes.sizeof(paramlock)
+    
+            # Lock the frame in the camera buffer & get address.
+            self.checkStatus(self.dcam.dcambuf_lockframe(self.camera_handle,
+                                                         ctypes.byref(paramlock)),
+                             "dcambuf_lockframe")
+    
+            # Create storage for the frame & copy into this storage.
+            hc_data = HCamData(self.frame_bytes)
+            hc_data.copyData(paramlock.buf)
+    
+            frames.append(hc_data)
+    
+        return [frames, [self.frame_x, self.frame_y]]
+    
+    def getLastEvenFrames(self):
+        
+        frames = []
+        
+        for n in self.lastEvenFrames():
+            paramlock = DCAMBUF_FRAME(
+                0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            paramlock.size = ctypes.sizeof(paramlock)
+    
+            # Lock the frame in the camera buffer & get address.
+            self.checkStatus(self.dcam.dcambuf_lockframe(self.camera_handle,
+                                                         ctypes.byref(paramlock)),
+                             "dcambuf_lockframe")
+    
+            # Create storage for the frame & copy into this storage.
+            hc_data = HCamData(self.frame_bytes)
+            hc_data.copyData(paramlock.buf)
+    
+            frames.append(hc_data)
+    
+        return [frames, [self.frame_x, self.frame_y]]
+    
+    def getLastOddFrames(self):
+        
+        frames = []
+        
+        for n in self.lastOddFrames():
             paramlock = DCAMBUF_FRAME(
                 0, 0, 0, n, None, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             paramlock.size = ctypes.sizeof(paramlock)
@@ -1623,6 +1692,7 @@ if __name__ == "__main__":
                                            binning = 1, hardware = None)
     #print("found: {} cameras".format(n_cameras))
     print("camera 0 model:", hamamatsu.getModelInfo())
+    print(type(hamamatsu.getModelInfo()))
     print("=====================")
     print(hamamatsu.getPropertiesValues())
     

@@ -9,8 +9,10 @@ from ScopeFoundry.helper_funcs import sibling_path, load_qt_ui_file
 from ScopeFoundry import h5_io
 import pyqtgraph as pg
 import numpy as np
+from datetime import datetime
+import os
+import time
 
-    
 class HamamatsuMeasurement(Measurement):
     
     name = "hamamatsu_image"
@@ -24,7 +26,7 @@ class HamamatsuMeasurement(Measurement):
     
         self.ui = load_qt_ui_file(self.ui_filename)
         self.settings.New('record', dtype=bool, initial=False, hardware_set_func=self.setRecord, hardware_read_func=self.getRecord, reread_from_hardware_after_write=True)
-        self.settings.New('save_h5', dtype=bool, initial=False, hardware_set_func=self.setSaveH5, hardware_read_func=self.getSaveH5, reread_from_hardware_after_write=True)
+        self.settings.New('save_h5', dtype=bool, initial=False, hardware_set_func=self.setSaveH5, hardware_read_func=self.getSaveH5)
         self.settings.New('refresh_period', dtype=float, unit='s', spinbox_decimals = 4, initial=0.02 , hardware_set_func=self.setRefresh, vmin = 0)
         self.settings.New('autoRange', dtype=bool, initial=True, hardware_set_func=self.setautoRange)
         self.settings.New('autoLevels', dtype=bool, initial=True, hardware_set_func=self.setautoLevels)
@@ -235,7 +237,8 @@ class HamamatsuMeasurement(Measurement):
 
             if self.settings['save_h5']:
                 self.h5file.close() # close h5 file  
-                  
+            self.settings.save_h5.update_value(new_val = False)
+
     def setRefresh(self, refresh_period):  
         self.display_update_period = refresh_period
     
@@ -261,12 +264,12 @@ class HamamatsuMeasurement(Measurement):
         self.threshold = threshold
     
     def setSaveH5(self, save_h5):
-        self.settings.save_h5 = save_h5
+        self.settings.save_h5.val = save_h5
         
     def getSaveH5(self):
         if self.settings['record']:
-            self.settings.save_h5 = False
-        return self.settings.save_h5 
+            self.settings.save_h5.val = False
+        return self.settings.save_h5.val 
         
     def setRecord(self, record):
         self.settings.record = record
@@ -277,13 +280,85 @@ class HamamatsuMeasurement(Measurement):
             self.settings.record = False
         return self.settings.record 
     
-            
     def initH5(self):
         """
         Initialization operations for the h5 file.
         """
         
         self.h5file = h5_io.h5_base_file(app=self.app, measurement=self)
+        self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
+        img_size=self.image.shape
+        length=self.camera.hamamatsu.number_image_buffers
+        self.image_h5 = self.h5_group.create_dataset( name  = 't0/c0/image', 
+                                                      shape = ( length, img_size[0], img_size[1]),
+                                                      dtype = self.image.dtype, chunks = (1, self.eff_subarrayv, self.eff_subarrayh)
+                                                      )
+        """
+        THESE NAMES MUST BE CHANGED
+        """
+        self.image_h5.dims[0].label = "z"
+        self.image_h5.dims[1].label = "y"
+        self.image_h5.dims[2].label = "x"
+        
+        #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
+        self.image_h5.attrs['element_size_um'] =  [1,1,1]
+        
+    def initH5_temp(self):
+        """
+        Initialization operations for the h5 file.
+        """
+        t0 = time.time()
+        f = self.app.settings['data_fname_format'].format(
+            app=self.app,
+            measurement=self,
+            timestamp=datetime.fromtimestamp(t0),
+            sample=self.app.settings["sample"],
+            ext='h5')
+        fname = os.path.join(self.app.settings['save_dir'], f)
+        
+        self.h5file = h5_io.h5_base_file(app=self.app, measurement=self, fname = fname)
+        self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
+        img_size=self.image.shape
+        length=self.camera.hamamatsu.number_image_buffers
+        self.image_h5 = self.h5_group.create_dataset( name  = 't0/c1/image', 
+                                                      shape = ( length, img_size[0], img_size[1]),
+                                                      dtype = self.image.dtype, chunks = (1, self.eff_subarrayv, self.eff_subarrayh)
+                                                      )
+        self.image_h5_2 = self.h5_group.create_dataset( name  = 't0/c2/image', 
+                                                      shape = ( length, img_size[0], img_size[1]),
+                                                      dtype = self.image.dtype, chunks = (1, self.eff_subarrayv, self.eff_subarrayh)
+                                                      )
+        """
+        THESE NAMES MUST BE CHANGED
+        """
+        self.image_h5.dims[0].label = "z"
+        self.image_h5.dims[1].label = "y"
+        self.image_h5.dims[2].label = "x"
+        
+        #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
+        self.image_h5.attrs['element_size_um'] =  [1,1,1]
+        
+        self.image_h5_2.dims[0].label = "z"
+        self.image_h5_2.dims[1].label = "y"
+        self.image_h5_2.dims[2].label = "x"
+        
+        #self.image_h5.attrs['element_size_um'] =  [self.settings['zsampling'], self.settings['ysampling'], self.settings['xsampling']]
+        self.image_h5_2.attrs['element_size_um'] =  [1,1,1]
+                
+    def initH5_temp2(self):
+        """
+        Initialization operations for the h5 file.
+        """
+        t0 = time.time()
+        f = self.app.settings['data_fname_format'].format(
+            app=self.app,
+            measurement=self,
+            timestamp=datetime.fromtimestamp(t0),
+            sample=self.app.settings["sample"],
+            ext='h5')
+        fname = os.path.join(self.app.settings['save_dir'], f)
+        
+        self.h5file = h5_io.h5_base_file(app=self.app, measurement=self, fname = fname)
         self.h5_group = h5_io.h5_create_measurement_group(measurement=self, h5group=self.h5file)
         img_size=self.image.shape
         length=self.camera.hamamatsu.number_image_buffers
