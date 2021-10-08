@@ -7,6 +7,7 @@ import ctypes
 import ctypes.util
 import numpy as np
 import time
+import Hamamatsu_ScopeFoundry.CameraHardware
 from numpy import log2
 # Hamamatsu constants.
 
@@ -1672,6 +1673,9 @@ class HamamatsuDeviceMR(HamamatsuDevice):
         self.max_backlog = 0
     
     
+        
+    
+
 
 
 if __name__ == "__main__":
@@ -1698,9 +1702,8 @@ if __name__ == "__main__":
     pg.image(np.reshape(np_data,(2048, 2048)).T)
     hamamatsu.stopAcquisition()
     hamamatsu.shutdown()
-    # if sys.flags.interactive !=1 or not hasattr(qtpy.QtCore, 'PYQT_VERSION'): 
-    #     QApplication.exec_()
-    
+    if sys.flags.interactive !=1 or not hasattr(qtpy.QtCore, 'PYQT_VERSION'):
+        QApplication.exec_()
 #
 # The MIT License
 #

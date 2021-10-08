@@ -5,7 +5,9 @@
 """
 
 from ScopeFoundry import HardwareComponent
-from Hamamatsu_ScopeFoundry.CameraDevice import HamamatsuDevice
+import Hamamatsu_ScopeFoundry.CameraDevice
+from Hamamatsu_ScopeFoundry.CameraDevice import HamamatsuDevice, HamamatsuDeviceMR, DCAMERR_NOERROR, DCAMException 
+
 
 class HamamatsuHardware(HardwareComponent):
     
@@ -68,7 +70,27 @@ class HamamatsuHardware(HardwareComponent):
         self.tractive = self.add_logged_quantity('trigger_active', dtype=str, si=False, ro=0, 
                                                    choices = ["edge", "syncreadout"], initial = 'edge', reread_from_hardware_after_write = True)
         
- 
+        
+#         self.preset_sizes = self.add_logged_quantity('preset_sizes', dtype=str, si=False, ro = 0, 
+#                                                      choices = ["2048x2048",
+#                                                                 "2048x1024",
+#                                                                 '2048x512'
+#                                                                 '2048x256'
+#                                                                 '2048x'
+#                                                                 '2048x'
+#                                                                 '2048x'
+#                                                                 '2048x'
+#                                                                 '2048x'
+#                                                                 '2048x'
+#                                                                 '2048x'
+#                                                                 ''
+#                                                                 ''
+#                                                                 ''
+#                                                                 ''
+#                                                                 ''
+#                                                                 ''
+#                                                                 ])
+
     
     def connect(self):
         """
@@ -78,6 +100,11 @@ class HamamatsuHardware(HardwareComponent):
         class. I'm struggling on how I can change this. There must be some function in
         ScopeFoundry
         """
+        
+        #self.trsource.change_readonly(True)
+        #self.trmode.change_readonly(True)
+        #self.trpolarity.change_readonly(True)
+        #self.acquisition_mode.change_readonly(True) #if we change from run_till_abort to fixed_length while running it crashes
         
         
         self.hamamatsu = HamamatsuDevice(camera_id=0, frame_x=self.subarrayh.val, frame_y=self.subarrayv.val, acquisition_mode=self.acquisition_mode.val, 
@@ -120,13 +147,24 @@ class HamamatsuHardware(HardwareComponent):
         
         self.read_from_hardware() #read from hardware at connection
         
-
+#         self.subarrayh.update_value(2048)
+#         self.subarrayv.update_value(2048)
+#         self.exposure_time.update_value(0.01)
+#         self.acquisition_mode.update_value("fixed_length")
+#         self.number_frames.update_value(2)
    
     def disconnect(self):
         
+        #self.trsource.change_readonly(False)
+        #self.trmode.change_readonly(False)
+        #self.trpolarity.change_readonly(False)
+        
         if hasattr(self, 'hamamatsu'):
             self.hamamatsu.stopAcquisition()
-            self.hamamatsu.shutdown()             
+            self.hamamatsu.shutdown() 
+#             error_uninit = self.hamamatsu.dcam.dcamapi_uninit()
+#             if (error_uninit != DCAMERR_NOERROR):
+#                 raise DCAMException("DCAM uninitialization failed with error code " + str(error_uninit))    
             del self.hamamatsu
             
         for lq in self.settings.as_list():
