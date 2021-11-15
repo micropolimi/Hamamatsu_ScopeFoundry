@@ -20,17 +20,17 @@ class HamamatsuHardware(HardwareComponent):
                                                     
         
         self.exposure_time = self.add_logged_quantity('exposure_time', dtype = float, si = False, ro = 0, 
-                                                       spinbox_step = 0.01, spinbox_decimals = 6, initial = 0.01, unit = 's', reread_from_hardware_after_write = True,
-                                                       vmin = 0)
+                                                        spinbox_step = 0.01, spinbox_decimals = 6, initial = 0.01, unit = 's', reread_from_hardware_after_write = True,
+                                                        vmin = 0, vmax = 10)
         
         self.internal_frame_rate = self.add_logged_quantity('internal_frame_rate', dtype = float, si = False, ro = 1,
-                                                            initial = 0, unit = 'fps')
+                                                            initial = 0, unit = 'fps', reread_from_hardware_after_write = True)
         
-        self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, ro = 0, 
-                                                         choices = ["fixed_length", "run_till_abort"], initial = "run_till_abort")
+        self.acquisition_mode = self.add_logged_quantity('acquisition_mode', dtype = str, si = False, ro = 0, 
+                                                         choices = ["fixed_length", "run_till_abort"], initial = "run_till_abort", reread_from_hardware_after_write = True)
         
         self.number_frames = self.add_logged_quantity("number_frames", dtype = int, si = False, ro = 0, 
-                                                      initial = 200, vmin = 1)
+                                                      initial = 200, vmin = 1, reread_from_hardware_after_write = True)
         
         #For subarray we have imposed float, since otherwise I cannot modify the step (I should modify the logged quantities script, but I prefer left it untouched)
         self.subarrayh = self.add_logged_quantity("subarray_hsize", dtype=float, si = False, ro= 0,
@@ -68,6 +68,9 @@ class HamamatsuHardware(HardwareComponent):
         self.tractive = self.add_logged_quantity('trigger_active', dtype=str, si=False, ro=0, 
                                                    choices = ["edge", "syncreadout"], initial = 'edge', reread_from_hardware_after_write = True)
         
+        self.trglobal = self.add_logged_quantity('trigger_global_exposure', dtype=str, si=False, ro=0, 
+                                                   choices = ["delayed", "global_reset"], initial = 'delayed', reread_from_hardware_after_write = True)
+        
  
     
     def connect(self):
@@ -92,10 +95,13 @@ class HamamatsuHardware(HardwareComponent):
         self.temperature.hardware_read_func = self.hamamatsu.getTemperature
         self.submode.hardware_read_func = self.hamamatsu.setSubArrayMode
         self.exposure_time.hardware_read_func = self.hamamatsu.getExposure
+        self.acquisition_mode.hardware_read_func = self.hamamatsu.getAcquisition
+        self.number_frames.hardware_read_func = self.hamamatsu.getNumberImages
         self.trsource.hardware_read_func = self.hamamatsu.getTriggerSource
         self.trmode.hardware_read_func = self.hamamatsu.getTriggerMode
         self.trpolarity.hardware_read_func = self.hamamatsu.getTriggerPolarity
         self.tractive.hardware_read_func = self.hamamatsu.getTriggerActive        
+        self.trglobal.hardware_read_func = self.hamamatsu.getTriggerGlobalExposure
         self.subarrayh.hardware_read_func = self.hamamatsu.getSubarrayH
         self.subarrayv.hardware_read_func = self.hamamatsu.getSubarrayV
         self.subarrayh_pos.hardware_read_func = self.hamamatsu.getSubarrayHpos
@@ -113,7 +119,8 @@ class HamamatsuHardware(HardwareComponent):
         self.trsource.hardware_set_func = self.hamamatsu.setTriggerSource
         self.trmode.hardware_set_func = self.hamamatsu.setTriggerMode
         self.trpolarity.hardware_set_func = self.hamamatsu.setTriggerPolarity
-        self.tractive.hardware_set_func = self.hamamatsu.setTriggerActive        
+        self.tractive.hardware_set_func = self.hamamatsu.setTriggerActive 
+        self.trglobal.hardware_set_func = self.hamamatsu.setTriggerGlobalExposure
         self.binning.hardware_set_func = self.hamamatsu.setBinning
         
         self.optimal_offset.hardware_set_func = self.readOnlyWhenOpt

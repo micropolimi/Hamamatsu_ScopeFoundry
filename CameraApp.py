@@ -15,8 +15,6 @@ class HamamatsuApp(BaseMicroscopeApp):
     def setup(self):
         
         from CameraHardware import HamamatsuHardware
-        
-        
         self.add_hardware(HamamatsuHardware(self))
         
         print("Adding Hardware Components")
